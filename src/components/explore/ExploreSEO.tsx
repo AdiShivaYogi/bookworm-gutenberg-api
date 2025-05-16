@@ -7,7 +7,7 @@ interface ExploreSEOProps {
 }
 
 export const ExploreSEO: React.FC<ExploreSEOProps> = ({ filters }) => {
-  const { searchQuery, selectedLanguage, selectedList, topicFilter } = filters;
+  const { searchQuery, selectedLanguage, selectedList, topicFilter, sortOrder } = filters;
 
   // Function to get SEO-friendly title based on current filters
   const getPageTitle = () => {
