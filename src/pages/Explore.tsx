@@ -124,7 +124,7 @@ const Explore = () => {
         )}
 
         {smartSearchResults && (
-          <SmartSearchResults collection={smartSearchResults} />
+          <SmartSearchResults collection={smartSearchResults} searchQuery={filters.searchQuery} />
         )}
         
         {!isLoading && data && (

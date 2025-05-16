@@ -1,21 +1,20 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import BookListItemCompact from '@/components/book/BookListItemCompact';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen } from 'lucide-react';
+import { BookRecommendation } from '@/hooks/useBookRecommendations';
+import { getPlaceholderBookCover } from '@/services/bookService';
 
 interface SmartSearchResultsProps {
   collection: {
     title: string;
-    books: Array<{
-      title: string;
-      author: string;
-    }>;
+    books: Array<BookRecommendation>;
   };
+  searchQuery?: string;
 }
 
-export const SmartSearchResults: React.FC<SmartSearchResultsProps> = ({ collection }) => {
+export const SmartSearchResults: React.FC<SmartSearchResultsProps> = ({ collection, searchQuery }) => {
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-accent/20 shadow-md mb-8">
       <CardHeader>
@@ -25,13 +24,28 @@ export const SmartSearchResults: React.FC<SmartSearchResultsProps> = ({ collecti
         </div>
         <CardTitle className="text-xl md:text-2xl">{collection.title}</CardTitle>
         <CardDescription>
-          O colecție de cărți recomandată special pentru tine
+          {searchQuery ? 
+            `O colecție de cărți bazată pe căutarea: "${searchQuery}"` : 
+            'O colecție de cărți recomandată special pentru tine'}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {collection.books.map((book, index) => (
-            <BookListItemCompact key={index} book={book} />
+            <Card key={index} className="overflow-hidden transition-all hover:shadow-md hover:-translate-y-1">
+              <CardContent className="p-0 aspect-[2/3] relative">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 z-10" />
+                <img 
+                  src={getPlaceholderBookCover(book.title)}
+                  alt={`Coperta pentru ${book.title}`}
+                  className="w-full h-full object-cover"
+                />
+              </CardContent>
+              <div className="p-3">
+                <h3 className="font-medium text-sm line-clamp-2">{book.title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-1">{book.author}</p>
+              </div>
+            </Card>
           ))}
         </div>
         

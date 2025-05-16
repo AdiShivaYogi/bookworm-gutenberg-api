@@ -71,6 +71,35 @@ export const getBookCoverImage = (book: Book): string => {
   return "/book-cover-placeholder.jpg";
 };
 
+// Generate placeholder book covers based on book title
+export const getPlaceholderBookCover = (title: string): string => {
+  // Generate a deterministic image based on the book title
+  const hash = title.split('').reduce((acc, char) => {
+    return acc + char.charCodeAt(0);
+  }, 0);
+  
+  // Use the hash to select a color and pattern for the cover
+  const hue = hash % 360;
+  const saturation = 70 + (hash % 20);
+  const lightness = 45 + (hash % 15);
+  
+  // Create a data URL for a simple gradient background
+  const svgContent = `
+    <svg width="300" height="450" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:hsl(${hue},${saturation}%,${lightness}%);stop-opacity:1" />
+          <stop offset="100%" style="stop-color:hsl(${(hue + 40) % 360},${saturation}%,${(lightness - 15) > 0 ? (lightness - 15) : lightness}%);stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grad)" />
+      <text x="50%" y="50%" font-family="Arial" font-size="24" fill="white" text-anchor="middle" opacity="0.8">${title.substring(0, 2).toUpperCase()}</text>
+    </svg>
+  `;
+  
+  return `data:image/svg+xml;base64,${btoa(svgContent)}`;
+};
+
 export const getBookFormats = (book: Book) => {
   const result: { [key: string]: string } = {};
   
