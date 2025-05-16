@@ -26,17 +26,17 @@ const Hero: React.FC = () => {
           <div className="inline-block p-2 px-4 bg-white/10 backdrop-blur-sm rounded-full mb-6 border border-white/10">
             <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
               <Library className="h-4 w-4" />
-              <span>Digital Library Platform</span>
+              <span>Biblioteca Digitală</span>
             </div>
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
-            Discover the World of <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">Knowledge</span>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            Descoperă Lumea <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">Cunoașterii</span>
           </h1>
           
           <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Libra is a modern digital library that rewards your engagement. 
-            Read, discover, and contribute to a growing community of book lovers.
+            Libra este o bibliotecă digitală modernă care recompensează implicarea ta.
+            Citește, descoperă și contribuie la o comunitate în creștere de iubitori de cărți.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -46,7 +46,7 @@ const Hero: React.FC = () => {
               className="bg-white text-libra-blue hover:bg-white/90 shadow-lg shadow-black/10 font-medium"
             >
               <Link to="/explore" className="gap-2">
-                Explore Books
+                Explorează Cărți
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -58,7 +58,7 @@ const Hero: React.FC = () => {
               className="border-white/20 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 font-medium"
             >
               <Link to="/about">
-                Learn More
+                Află Mai Multe
               </Link>
             </Button>
           </div>
