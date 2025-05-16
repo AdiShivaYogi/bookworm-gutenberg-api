@@ -28,7 +28,15 @@ export const useBookRecommendations = (book: Book | null) => {
     setIsLoadingRecommendations(true);
     try {
       const result = await generateSimilarBooksRecommendation(book);
-      setRecommendations(result);
+      // Fix TypeScript error by ensuring we transform the result to match BookRecommendation interface
+      const formattedRecommendations: BookRecommendation[] = Array.isArray(result) 
+        ? result.map((item: any) => ({
+            title: item.title || "Unknown title",
+            author: item.author || "Unknown author"
+          }))
+        : [];
+      
+      setRecommendations(formattedRecommendations);
       
       toast({
         title: "Recomandări generate",
