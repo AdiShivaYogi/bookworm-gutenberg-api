@@ -14,16 +14,28 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 const Explore = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedLanguage, setSelectedLanguage] = useState('all'); // Changed from '' to 'all'
+  const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [sortOrder, setSortOrder] = useState('popular');
   const searchQuery = searchParams.get('search') || '';
   const topicFilter = searchParams.get('topic') || '';
+
+  // Initialize state from URL if present
+  useEffect(() => {
+    const langParam = searchParams.get('languages');
+    if (langParam) setSelectedLanguage(langParam);
+    
+    const sortParam = searchParams.get('sort');
+    if (sortParam) setSortOrder(sortParam);
+    
+    const pageParam = searchParams.get('page');
+    if (pageParam) setCurrentPage(parseInt(pageParam, 10));
+  }, []);
 
   // Update URL when filters change
   useEffect(() => {
     const newParams = new URLSearchParams();
     if (searchQuery) newParams.set('search', searchQuery);
-    if (selectedLanguage && selectedLanguage !== 'all') newParams.set('languages', selectedLanguage); // Only add if not 'all'
+    if (selectedLanguage && selectedLanguage !== 'all') newParams.set('languages', selectedLanguage);
     if (sortOrder) newParams.set('sort', sortOrder);
     if (topicFilter) newParams.set('topic', topicFilter);
     if (currentPage > 1) newParams.set('page', currentPage.toString());
@@ -33,7 +45,7 @@ const Explore = () => {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['books', selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter],
     queryFn: () => fetchBooks({
-      languages: selectedLanguage !== 'all' ? selectedLanguage : '', // Only use language if not 'all'
+      languages: selectedLanguage !== 'all' ? selectedLanguage : '',
       sort: sortOrder as 'popular' | 'ascending' | 'descending',
       search: searchQuery,
       topic: topicFilter,

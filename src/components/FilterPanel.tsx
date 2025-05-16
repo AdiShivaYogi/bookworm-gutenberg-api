@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Languages, Filter, X, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { Languages, Filter, X, ChevronDown, SlidersHorizontal, TrendingUp, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { 
@@ -11,6 +11,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface FilterPanelProps {
   selectedLanguage: string;
@@ -27,9 +28,10 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("basic");
 
   const languages = [
-    { code: 'all', name: 'All Languages' }, // Changed from empty string to 'all'
+    { code: 'all', name: 'All Languages' },
     { code: 'en', name: 'English' },
     { code: 'fr', name: 'French' },
     { code: 'de', name: 'German' },
@@ -44,6 +46,13 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     { value: 'popular', label: 'Most Popular' },
     { value: 'ascending', label: 'Title A-Z' },
     { value: 'descending', label: 'Title Z-A' },
+  ];
+
+  const popularLists = [
+    { value: 'top-downloads', label: 'Most Downloaded' },
+    { value: 'new-additions', label: 'Recently Added' },
+    { value: 'classics', label: 'Classic Literature' },
+    { value: 'fiction', label: 'Fiction Bestsellers' },
   ];
 
   // Update active filters display
@@ -127,49 +136,86 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       </div>
       
       <CollapsibleContent className="mt-4">
-        <div className="flex flex-col sm:flex-row w-full gap-4">
-          <div className="w-full sm:w-48">
-            <Label htmlFor="language" className="mb-1 block text-sm font-medium flex items-center gap-1">
-              <Languages className="h-3.5 w-3.5 text-accent" /> Language
-            </Label>
-            <Select
-              value={selectedLanguage}
-              onValueChange={setSelectedLanguage}
-            >
-              <SelectTrigger id="language" className="bg-background/80">
-                <SelectValue placeholder="Select language" />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    {lang.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="w-full sm:w-48">
-            <Label htmlFor="sort" className="mb-1 block text-sm font-medium flex items-center gap-1">
-              <SlidersHorizontal className="h-3.5 w-3.5 text-accent" /> Sort By
-            </Label>
-            <Select
-              value={sortOrder}
-              onValueChange={setSortOrder}
-            >
-              <SelectTrigger id="sort" className="bg-background/80">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <Tabs defaultValue="basic" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="basic">Basic Filters</TabsTrigger>
+            <TabsTrigger value="popular">Popular Lists</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="basic" className="space-y-4">
+            <div className="flex flex-col sm:flex-row w-full gap-4">
+              <div className="w-full sm:w-48">
+                <Label htmlFor="language" className="mb-1 block text-sm font-medium flex items-center gap-1">
+                  <Languages className="h-3.5 w-3.5 text-accent" /> Language
+                </Label>
+                <Select
+                  value={selectedLanguage}
+                  onValueChange={setSelectedLanguage}
+                >
+                  <SelectTrigger id="language" className="bg-background/80">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code}>
+                        {lang.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="w-full sm:w-48">
+                <Label htmlFor="sort" className="mb-1 block text-sm font-medium flex items-center gap-1">
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-accent" /> Sort By
+                </Label>
+                <Select
+                  value={sortOrder}
+                  onValueChange={setSortOrder}
+                >
+                  <SelectTrigger id="sort" className="bg-background/80">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sortOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="popular" className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {popularLists.map((list) => (
+                <Button
+                  key={list.value}
+                  variant="outline"
+                  size="sm"
+                  className="justify-start gap-2 h-auto py-3"
+                  onClick={() => {
+                    // Here we would implement the actual filtering logic
+                    // For now, we'll just update the sort to reflect the user's choice
+                    setSortOrder('popular');
+                    setActiveTab("basic");
+                  }}
+                >
+                  {list.value === 'top-downloads' && <TrendingUp className="h-4 w-4 text-accent" />}
+                  {list.value === 'new-additions' && <ListOrdered className="h-4 w-4 text-accent" />}
+                  {list.value === 'classics' && <Filter className="h-4 w-4 text-accent" />}
+                  {list.value === 'fiction' && <SlidersHorizontal className="h-4 w-4 text-accent" />}
+                  <span>{list.label}</span>
+                </Button>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              Select a popular list to quickly filter books by category
+            </p>
+          </TabsContent>
+        </Tabs>
       </CollapsibleContent>
     </Collapsible>
   );
