@@ -19,7 +19,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import SimilarBooksSection from '@/components/book/SimilarBooksSection';
+import CreateCollectionSection from '@/components/book/CreateCollectionSection';
 
 const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -107,7 +109,7 @@ const BookDetails = () => {
               <div className="rounded-md overflow-hidden border mb-6">
                 <img
                   src={coverImage}
-                  alt={`Cover of ${book.title}`}
+                  alt={`Cover of ${book?.title}`}
                   className="w-full aspect-[2/3] object-cover"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = "/placeholder.svg";
@@ -147,11 +149,11 @@ const BookDetails = () => {
           
           {/* Book Details */}
           <div className="md:w-2/3 lg:w-3/4">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">{book.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">{book?.title}</h1>
             
             {/* Authors */}
             <div className="mb-6">
-              {book.authors.map((author, index) => (
+              {book?.authors.map((author, index) => (
                 <span key={index} className="text-lg">
                   {author.name}
                   {author.birth_year || author.death_year ? (
@@ -168,19 +170,19 @@ const BookDetails = () => {
             <div className="flex flex-wrap gap-4 mb-6">
               <div className="flex items-center text-sm text-muted-foreground">
                 <Globe className="mr-1 h-4 w-4" />
-                {book.languages.map(lang => lang.toUpperCase()).join(', ')}
+                {book?.languages.map(lang => lang.toUpperCase()).join(', ')}
               </div>
               
               <div className="flex items-center text-sm text-muted-foreground">
                 <Users className="mr-1 h-4 w-4" />
-                {book.download_count.toLocaleString()} downloads
+                {book?.download_count.toLocaleString()} downloads
               </div>
               
               <div className="flex items-center text-sm text-muted-foreground">
                 <Calendar className="mr-1 h-4 w-4" />
-                {book.copyright === null 
+                {book?.copyright === null 
                   ? 'Unknown copyright' 
-                  : book.copyright 
+                  : book?.copyright 
                     ? 'Copyrighted' 
                     : 'Public Domain'
                 }
@@ -188,7 +190,7 @@ const BookDetails = () => {
             </div>
             
             {/* Subjects & Bookshelves */}
-            {book.subjects && book.subjects.length > 0 && (
+            {book?.subjects && book.subjects.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-medium mb-2 flex items-center">
                   <Tag className="mr-2 h-4 w-4" /> Subjects
@@ -201,7 +203,7 @@ const BookDetails = () => {
               </div>
             )}
             
-            {book.bookshelves && book.bookshelves.length > 0 && (
+            {book?.bookshelves && book.bookshelves.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-medium mb-2">Bookshelves</h3>
                 <div className="flex flex-wrap gap-2">
@@ -215,7 +217,7 @@ const BookDetails = () => {
             <Separator className="my-6" />
             
             {/* Translators if any */}
-            {book.translators && book.translators.length > 0 && (
+            {book?.translators && book.translators.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-medium mb-2">Translators</h3>
                 <p>
@@ -228,6 +230,12 @@ const BookDetails = () => {
                 </p>
               </div>
             )}
+            
+            {/* AI-powered Recommendations */}
+            {book && <SimilarBooksSection book={book} />}
+            
+            {/* AI-powered Collection Creator */}
+            {book && <CreateCollectionSection book={book} />}
             
             {/* Community Section (placeholder for token rewards) */}
             <div className="bg-muted/30 border rounded-lg p-4 mt-8">
