@@ -25,7 +25,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   setSortOrder
 }) => {
   const languages = [
-    { code: '', name: 'All Languages' },
+    { code: 'all', name: 'All Languages' }, // Changed from empty string to 'all'
     { code: 'en', name: 'English' },
     { code: 'fr', name: 'French' },
     { code: 'de', name: 'German' },

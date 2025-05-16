@@ -14,7 +14,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 const Explore = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('all'); // Changed from '' to 'all'
   const [sortOrder, setSortOrder] = useState('popular');
   const searchQuery = searchParams.get('search') || '';
   const topicFilter = searchParams.get('topic') || '';
@@ -23,7 +23,7 @@ const Explore = () => {
   useEffect(() => {
     const newParams = new URLSearchParams();
     if (searchQuery) newParams.set('search', searchQuery);
-    if (selectedLanguage) newParams.set('languages', selectedLanguage);
+    if (selectedLanguage && selectedLanguage !== 'all') newParams.set('languages', selectedLanguage); // Only add if not 'all'
     if (sortOrder) newParams.set('sort', sortOrder);
     if (topicFilter) newParams.set('topic', topicFilter);
     if (currentPage > 1) newParams.set('page', currentPage.toString());
@@ -33,13 +33,13 @@ const Explore = () => {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['books', selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter],
     queryFn: () => fetchBooks({
-      languages: selectedLanguage,
+      languages: selectedLanguage !== 'all' ? selectedLanguage : '', // Only use language if not 'all'
       sort: sortOrder as 'popular' | 'ascending' | 'descending',
       search: searchQuery,
       topic: topicFilter,
       page: currentPage
     }),
-    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const handleSearch = (query: string) => {
@@ -76,7 +76,7 @@ const Explore = () => {
           <PaginationItem>
             <PaginationPrevious 
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
+              aria-disabled={currentPage === 1}
               className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
             />
           </PaginationItem>
@@ -88,7 +88,7 @@ const Explore = () => {
                 <PaginationLink onClick={() => setCurrentPage(1)}>1</PaginationLink>
               </PaginationItem>
               <PaginationItem>
-                <PaginationLink disabled>...</PaginationLink>
+                <PaginationLink aria-disabled={true} className="opacity-50">...</PaginationLink>
               </PaginationItem>
             </>
           )}
@@ -121,7 +121,7 @@ const Explore = () => {
           {totalPages > 7 && currentPage < totalPages - 2 && (
             <>
               <PaginationItem>
-                <PaginationLink disabled>...</PaginationLink>
+                <PaginationLink aria-disabled={true} className="opacity-50">...</PaginationLink>
               </PaginationItem>
               <PaginationItem>
                 <PaginationLink onClick={() => setCurrentPage(totalPages)}>
@@ -134,7 +134,7 @@ const Explore = () => {
           <PaginationItem>
             <PaginationNext 
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
+              aria-disabled={currentPage === totalPages}
               className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
             />
           </PaginationItem>
