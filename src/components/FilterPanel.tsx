@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Languages, Filter, X, ChevronDown, SlidersHorizontal, TrendingUp, ListOrdered } from 'lucide-react';
+import { Languages, Filter, ChevronDown, SlidersHorizontal, TrendingUp, BookOpen, Calendar, Award, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { 
@@ -18,41 +18,45 @@ interface FilterPanelProps {
   setSelectedLanguage: (language: string) => void;
   sortOrder: string;
   setSortOrder: (order: string) => void;
+  onPopularListSelect?: (listType: string) => void;
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
   selectedLanguage,
   setSelectedLanguage,
   sortOrder,
-  setSortOrder
+  setSortOrder,
+  onPopularListSelect
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("basic");
+  const [selectedList, setSelectedList] = useState<string | null>(null);
 
   const languages = [
-    { code: 'all', name: 'All Languages' },
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'it', name: 'Italian' },
-    { code: 'pt', name: 'Portuguese' },
-    { code: 'ru', name: 'Russian' },
-    { code: 'fi', name: 'Finnish' },
+    { code: 'all', name: 'Toate limbile', seo: 'carti in toate limbile' },
+    { code: 'en', name: 'Engleză', seo: 'carti in limba engleza' },
+    { code: 'fr', name: 'Franceză', seo: 'carti in limba franceza' },
+    { code: 'de', name: 'Germană', seo: 'carti in limba germana' },
+    { code: 'es', name: 'Spaniolă', seo: 'carti in limba spaniola' },
+    { code: 'it', name: 'Italiană', seo: 'carti in limba italiana' },
+    { code: 'pt', name: 'Portugheză', seo: 'carti in limba portugheza' },
+    { code: 'ru', name: 'Rusă', seo: 'carti in limba rusa' },
+    { code: 'fi', name: 'Finlandeză', seo: 'carti in limba finlandeza' },
   ];
 
   const sortOptions = [
-    { value: 'popular', label: 'Most Popular' },
-    { value: 'ascending', label: 'Title A-Z' },
-    { value: 'descending', label: 'Title Z-A' },
+    { value: 'popular', label: 'Cele mai populare', seo: 'cele mai populare carti' },
+    { value: 'ascending', label: 'Titlu A-Z', seo: 'carti in ordine alfabetica' },
+    { value: 'descending', label: 'Titlu Z-A', seo: 'carti in ordine alfabetica inversa' },
   ];
 
   const popularLists = [
-    { value: 'top-downloads', label: 'Most Downloaded' },
-    { value: 'new-additions', label: 'Recently Added' },
-    { value: 'classics', label: 'Classic Literature' },
-    { value: 'fiction', label: 'Fiction Bestsellers' },
+    { value: 'top-downloads', label: 'Cele mai descărcate', seo: 'cele mai descarcate carti gratuite', icon: <TrendingUp className="h-4 w-4 text-accent" /> },
+    { value: 'new-additions', label: 'Adăugate recent', seo: 'cele mai noi carti adaugate', icon: <Calendar className="h-4 w-4 text-accent" /> },
+    { value: 'classics', label: 'Literatură clasică', seo: 'literatura clasica gratuita', icon: <Award className="h-4 w-4 text-accent" /> },
+    { value: 'fiction', label: 'Ficțiune populară', seo: 'cele mai bune carti de fictiune', icon: <BookOpen className="h-4 w-4 text-accent" /> },
+    { value: 'educational', label: 'Cărți educaționale', seo: 'carti educationale gratuite', icon: <Star className="h-4 w-4 text-accent" /> },
   ];
 
   // Update active filters display
@@ -68,6 +72,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       const sortName = sortOptions.find(opt => opt.value === sortOrder)?.label || '';
       if (sortName) filters.push(sortName);
     }
+
+    if (selectedList) {
+      const listName = popularLists.find(list => list.value === selectedList)?.label || '';
+      if (listName) filters.push(listName);
+    }
     
     setActiveFilters(filters);
   };
@@ -75,7 +84,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   // Call updateActiveFilters when filters change
   React.useEffect(() => {
     updateActiveFilters();
-  }, [selectedLanguage, sortOrder]);
+  }, [selectedLanguage, sortOrder, selectedList]);
 
   const clearLanguage = () => {
     setSelectedLanguage('all');
@@ -83,6 +92,24 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
   const clearSort = () => {
     setSortOrder('popular');
+  };
+
+  const clearAllFilters = () => {
+    clearLanguage();
+    clearSort();
+    setSelectedList(null);
+    if (onPopularListSelect) onPopularListSelect('');
+  };
+
+  const handlePopularListSelect = (listValue: string) => {
+    if (selectedList === listValue) {
+      setSelectedList(null);
+      if (onPopularListSelect) onPopularListSelect('');
+    } else {
+      setSelectedList(listValue);
+      if (onPopularListSelect) onPopularListSelect(listValue);
+    }
+    setActiveTab("basic"); // Return to basic tab after selection
   };
 
   return (
@@ -99,7 +126,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             className="flex items-center gap-2 px-0 font-medium text-lg hover:bg-transparent hover:text-primary"
           >
             <Filter className="h-5 w-5 text-muted-foreground" />
-            Filter Books
+            Filtrare cărți
             <ChevronDown 
               className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
             />
@@ -123,12 +150,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 variant="ghost" 
                 size="sm" 
                 className="h-6 text-xs px-2 text-muted-foreground hover:text-foreground"
-                onClick={() => {
-                  clearLanguage();
-                  clearSort();
-                }}
+                onClick={clearAllFilters}
               >
-                Clear all
+                Șterge toate
               </Button>
             )}
           </div>
@@ -138,22 +162,22 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       <CollapsibleContent className="mt-4">
         <Tabs defaultValue="basic" className="w-full" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
-            <TabsTrigger value="basic">Basic Filters</TabsTrigger>
-            <TabsTrigger value="popular">Popular Lists</TabsTrigger>
+            <TabsTrigger value="basic">Filtre de bază</TabsTrigger>
+            <TabsTrigger value="popular">Liste populare</TabsTrigger>
           </TabsList>
 
           <TabsContent value="basic" className="space-y-4">
             <div className="flex flex-col sm:flex-row w-full gap-4">
               <div className="w-full sm:w-48">
                 <Label htmlFor="language" className="mb-1 block text-sm font-medium flex items-center gap-1">
-                  <Languages className="h-3.5 w-3.5 text-accent" /> Language
+                  <Languages className="h-3.5 w-3.5 text-accent" /> Limbă
                 </Label>
                 <Select
                   value={selectedLanguage}
                   onValueChange={setSelectedLanguage}
                 >
                   <SelectTrigger id="language" className="bg-background/80">
-                    <SelectValue placeholder="Select language" />
+                    <SelectValue placeholder="Selectează limba" />
                   </SelectTrigger>
                   <SelectContent>
                     {languages.map((lang) => (
@@ -167,14 +191,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               
               <div className="w-full sm:w-48">
                 <Label htmlFor="sort" className="mb-1 block text-sm font-medium flex items-center gap-1">
-                  <SlidersHorizontal className="h-3.5 w-3.5 text-accent" /> Sort By
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-accent" /> Sortează după
                 </Label>
                 <Select
                   value={sortOrder}
                   onValueChange={setSortOrder}
                 >
                   <SelectTrigger id="sort" className="bg-background/80">
-                    <SelectValue placeholder="Sort by" />
+                    <SelectValue placeholder="Sortează după" />
                   </SelectTrigger>
                   <SelectContent>
                     {sortOptions.map((option) => (
@@ -189,30 +213,22 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           </TabsContent>
 
           <TabsContent value="popular" className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {popularLists.map((list) => (
                 <Button
                   key={list.value}
-                  variant="outline"
+                  variant={selectedList === list.value ? "default" : "outline"}
                   size="sm"
                   className="justify-start gap-2 h-auto py-3"
-                  onClick={() => {
-                    // Here we would implement the actual filtering logic
-                    // For now, we'll just update the sort to reflect the user's choice
-                    setSortOrder('popular');
-                    setActiveTab("basic");
-                  }}
+                  onClick={() => handlePopularListSelect(list.value)}
                 >
-                  {list.value === 'top-downloads' && <TrendingUp className="h-4 w-4 text-accent" />}
-                  {list.value === 'new-additions' && <ListOrdered className="h-4 w-4 text-accent" />}
-                  {list.value === 'classics' && <Filter className="h-4 w-4 text-accent" />}
-                  {list.value === 'fiction' && <SlidersHorizontal className="h-4 w-4 text-accent" />}
+                  {list.icon}
                   <span>{list.label}</span>
                 </Button>
               ))}
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              Select a popular list to quickly filter books by category
+              Selectează o listă populară pentru a filtra rapid cărțile după categoria dorită
             </p>
           </TabsContent>
         </Tabs>

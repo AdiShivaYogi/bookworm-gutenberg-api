@@ -16,6 +16,7 @@ const Explore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [sortOrder, setSortOrder] = useState('popular');
+  const [selectedList, setSelectedList] = useState('');
   const searchQuery = searchParams.get('search') || '';
   const topicFilter = searchParams.get('topic') || '';
 
@@ -29,6 +30,9 @@ const Explore = () => {
     
     const pageParam = searchParams.get('page');
     if (pageParam) setCurrentPage(parseInt(pageParam, 10));
+    
+    const listParam = searchParams.get('list');
+    if (listParam) setSelectedList(listParam);
   }, []);
 
   // Update URL when filters change
@@ -38,17 +42,29 @@ const Explore = () => {
     if (selectedLanguage && selectedLanguage !== 'all') newParams.set('languages', selectedLanguage);
     if (sortOrder) newParams.set('sort', sortOrder);
     if (topicFilter) newParams.set('topic', topicFilter);
+    if (selectedList) newParams.set('list', selectedList);
     if (currentPage > 1) newParams.set('page', currentPage.toString());
     setSearchParams(newParams);
-  }, [selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter]);
+  }, [selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter, selectedList]);
+
+  const getApiTopicFromList = (list: string) => {
+    const listToTopicMap: Record<string, string> = {
+      'top-downloads': 'bestsellers',
+      'new-additions': 'recent',
+      'classics': 'classics',
+      'fiction': 'fiction',
+      'educational': 'education'
+    };
+    return listToTopicMap[list] || '';
+  };
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['books', selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter],
+    queryKey: ['books', selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter, selectedList],
     queryFn: () => fetchBooks({
       languages: selectedLanguage !== 'all' ? selectedLanguage : '',
       sort: sortOrder as 'popular' | 'ascending' | 'descending',
       search: searchQuery,
-      topic: topicFilter,
+      topic: selectedList ? getApiTopicFromList(selectedList) : topicFilter,
       page: currentPage
     }),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -76,8 +92,51 @@ const Explore = () => {
     setCurrentPage(1);
     setSortOrder(value);
   };
+  
+  const handlePopularListSelect = (value: string) => {
+    setCurrentPage(1);
+    setSelectedList(value);
+  };
 
   const totalPages = data ? Math.ceil(data.count / 32) : 0;
+
+  // Function to get SEO-friendly title based on current filters
+  const getPageTitle = () => {
+    let title = "Explorează cărți";
+    
+    if (searchQuery) {
+      title += ` despre "${searchQuery}"`;
+    }
+    
+    if (selectedList) {
+      const listTypes: Record<string, string> = {
+        'top-downloads': 'cele mai descărcate',
+        'new-additions': 'adăugate recent',
+        'classics': 'clasice',
+        'fiction': 'de ficțiune populare',
+        'educational': 'educaționale'
+      };
+      title += ` - ${listTypes[selectedList] || ''}`;
+    } else if (topicFilter) {
+      title += ` din categoria ${topicFilter}`;
+    }
+    
+    if (selectedLanguage !== 'all') {
+      const languages: Record<string, string> = {
+        'en': 'în limba engleză',
+        'fr': 'în limba franceză',
+        'de': 'în limba germană',
+        'es': 'în limba spaniolă',
+        'it': 'în limba italiană',
+        'pt': 'în limba portugheză',
+        'ru': 'în limba rusă',
+        'fi': 'în limba finlandeză'
+      };
+      title += ` ${languages[selectedLanguage] || ''}`;
+    }
+    
+    return title;
+  };
 
   const renderPagination = () => {
     if (!data || totalPages <= 1) return null;
@@ -155,16 +214,21 @@ const Explore = () => {
     );
   };
 
+  // Set page title for SEO
+  useEffect(() => {
+    document.title = `${getPageTitle()} | Libra - Biblioteca digitală`;
+  }, [selectedLanguage, sortOrder, searchQuery, topicFilter, selectedList]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar onSearchChange={handleSearch} />
       <main className="container px-4 py-8 flex-grow">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Explore Books</h1>
+          <h1 className="text-3xl font-bold mb-2">{getPageTitle()}</h1>
           <p className="text-muted-foreground">
-            Browse the collection of free books from Project Gutenberg
-            {searchQuery && <span> matching "<strong>{searchQuery}</strong>"</span>}
-            {topicFilter && <span> in <strong>{topicFilter}</strong></span>}
+            Răsfoiește colecția de cărți gratuite din Proiectul Gutenberg
+            {searchQuery && <span> care conțin "<strong>{searchQuery}</strong>"</span>}
+            {topicFilter && <span> din categoria <strong>{topicFilter}</strong></span>}
           </p>
         </div>
         
@@ -173,13 +237,14 @@ const Explore = () => {
           setSelectedLanguage={handleLanguageChange}
           sortOrder={sortOrder}
           setSortOrder={handleSortOrderChange}
+          onPopularListSelect={handlePopularListSelect}
         />
         
         {(isLoading || isFetching) && (
           <div className="flex justify-center my-12">
             <Button disabled variant="ghost" className="gap-2">
               <Loader2 className="h-5 w-5 animate-spin" />
-              Loading books...
+              Se încarcă cărțile...
             </Button>
           </div>
         )}
@@ -187,7 +252,7 @@ const Explore = () => {
         {!isLoading && data && (
           <>
             <div className="text-sm text-muted-foreground mb-4">
-              Found {data.count} books
+              S-au găsit {data.count} cărți
             </div>
             <BookGrid books={data.results} isLoading={false} />
             {renderPagination()}
