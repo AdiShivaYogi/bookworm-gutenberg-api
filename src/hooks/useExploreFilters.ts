@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -8,6 +9,7 @@ export interface ExploreFilters {
   currentPage: number;
   selectedList: string;
   topicFilter: string;
+  isSmartSearch?: boolean;
 }
 
 export const useExploreFilters = () => {
@@ -16,6 +18,7 @@ export const useExploreFilters = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [sortOrder, setSortOrder] = useState('popular');
   const [selectedList, setSelectedList] = useState('');
+  const [isSmartSearch, setIsSmartSearch] = useState(false);
   
   const searchQuery = searchParams.get('search') || '';
   const topicFilter = searchParams.get('topic') || '';
@@ -33,6 +36,9 @@ export const useExploreFilters = () => {
     
     const listParam = searchParams.get('list');
     if (listParam) setSelectedList(listParam);
+    
+    const smartParam = searchParams.get('smart');
+    if (smartParam === 'true') setIsSmartSearch(true);
   }, []);
 
   // Update URL when filters change
@@ -44,11 +50,13 @@ export const useExploreFilters = () => {
     if (topicFilter) newParams.set('topic', topicFilter);
     if (selectedList) newParams.set('list', selectedList);
     if (currentPage > 1) newParams.set('page', currentPage.toString());
+    if (isSmartSearch) newParams.set('smart', 'true');
     setSearchParams(newParams);
-  }, [selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter, selectedList]);
+  }, [selectedLanguage, sortOrder, currentPage, searchQuery, topicFilter, selectedList, isSmartSearch]);
 
   const handleSearch = (query: string) => {
     setCurrentPage(1);
+    setIsSmartSearch(false); // Reset smart search when performing a regular search
     setSearchParams(prev => {
       const newParams = new URLSearchParams(prev);
       if (query) {
@@ -74,6 +82,11 @@ export const useExploreFilters = () => {
     setCurrentPage(1);
     setSelectedList(value);
   };
+  
+  const toggleSmartSearch = () => {
+    setIsSmartSearch(prev => !prev);
+    setCurrentPage(1);
+  };
 
   return {
     filters: {
@@ -83,11 +96,13 @@ export const useExploreFilters = () => {
       currentPage,
       selectedList,
       topicFilter,
+      isSmartSearch,
     },
     setCurrentPage,
     handleSearch,
     handleLanguageChange,
     handleSortOrderChange,
-    handlePopularListSelect
+    handlePopularListSelect,
+    toggleSmartSearch
   };
 };

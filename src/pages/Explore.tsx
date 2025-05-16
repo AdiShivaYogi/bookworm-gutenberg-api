@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -7,13 +7,20 @@ import BookGrid from '@/components/BookGrid';
 import FilterPanel from '@/components/FilterPanel';
 import { fetchBooks } from '@/services/bookService';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, BookOpen, Search } from 'lucide-react';
 import { useExploreFilters } from '@/hooks/useExploreFilters';
 import { ExploreSEO } from '@/components/explore/ExploreSEO';
 import { ExplorePagination } from '@/components/explore/ExplorePagination';
 import { getApiTopicFromList } from '@/components/explore/ExploreUtils';
+import { useToast } from '@/hooks/use-toast';
+import { createPersonalizedCollection } from '@/services/deepSeekService';
+import { SmartSearchResults } from '@/components/explore/SmartSearchResults';
 
 const Explore = () => {
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [smartSearchResults, setSmartSearchResults] = useState(null);
+  
   const {
     filters,
     setCurrentPage,
@@ -35,7 +42,34 @@ const Explore = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  const handleSmartSearch = async () => {
+    if (!filters.searchQuery) return;
+    
+    setIsGenerating(true);
+    setSmartSearchResults(null);
+    
+    try {
+      const collection = await createPersonalizedCollection(filters.searchQuery);
+      setSmartSearchResults(collection);
+      
+      toast({
+        title: "Colecție generată",
+        description: "Am creat o colecție personalizată bazată pe cererea ta",
+      });
+    } catch (error) {
+      console.error("Error generating collection:", error);
+      toast({
+        title: "Eroare",
+        description: "Nu am putut genera colecția. Încearcă din nou mai târziu.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const totalPages = data ? Math.ceil(data.count / 32) : 0;
+  const hasNoResults = !isLoading && data && data.count === 0;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -59,18 +93,55 @@ const Explore = () => {
             </Button>
           </div>
         )}
+
+        {hasNoResults && filters.searchQuery && (
+          <div className="bg-accent/10 rounded-lg p-6 my-8">
+            <h3 className="text-xl font-medium flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Nu am găsit rezultate pentru "{filters.searchQuery}"
+            </h3>
+            <p className="text-muted-foreground mt-2 mb-4">
+              Cauți o recomandare de lectură? Folosește căutarea inteligentă pentru a genera o colecție personalizată bazată pe cererea ta.
+            </p>
+            <Button 
+              onClick={handleSmartSearch} 
+              disabled={isGenerating}
+              className="gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Se generează...
+                </>
+              ) : (
+                <>
+                  <BookOpen className="h-4 w-4" />
+                  Generează o colecție personalizată
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
+        {smartSearchResults && (
+          <SmartSearchResults collection={smartSearchResults} />
+        )}
         
         {!isLoading && data && (
           <>
-            <div className="text-sm text-muted-foreground mb-4">
-              S-au găsit {data.count} cărți
-            </div>
-            <BookGrid books={data.results} isLoading={false} />
-            <ExplorePagination 
-              currentPage={filters.currentPage} 
-              totalPages={totalPages}
-              setCurrentPage={setCurrentPage}
-            />
+            {data.count > 0 && (
+              <div className="text-sm text-muted-foreground mb-4">
+                S-au găsit {data.count} cărți
+              </div>
+            )}
+            {data.count > 0 && <BookGrid books={data.results} isLoading={false} />}
+            {data.count > 0 && (
+              <ExplorePagination 
+                currentPage={filters.currentPage} 
+                totalPages={totalPages}
+                setCurrentPage={setCurrentPage}
+              />
+            )}
           </>
         )}
       </main>
