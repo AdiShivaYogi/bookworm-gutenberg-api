@@ -6,7 +6,7 @@ import { ALL_COLLECTION_PROMPTS } from './collectionPrompts';
 // Component that contains all predefined collections for the main page
 export const DynamicCollections: React.FC = () => {
   // Randomly select between 8-12 different collections to display
-  const [selectedCollections, setSelectedCollections] = useState(ALL_COLLECTION_PROMPTS.slice(0, 0));
+  const [selectedCollections, setSelectedCollections] = useState(ALL_COLLECTION_PROMPTS.slice(0, 8));
 
   // Regenerate collections on each page reload
   useEffect(() => {

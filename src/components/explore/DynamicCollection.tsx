@@ -66,7 +66,7 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
     return null;
   }
 
-  // Create icon element with className
+  // Create icon element from the provided icon component
   const IconComponent = icon;
   
   return (
