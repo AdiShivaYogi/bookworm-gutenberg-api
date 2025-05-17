@@ -29,6 +29,19 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
   const [collectionTitle, setCollectionTitle] = useState<string>(title);
   const [error, setError] = useState<boolean>(false);
 
+  // Funcție pentru a simplifica titlul unei colecții
+  const simplifyCollectionTitle = (title: string): string => {
+    // Verifică dacă titlul conține un format cu autori și detalii Gutenberg
+    if (title.includes(' de ') && title.includes(' din Gutenberg')) {
+      // Caută partea de început a titlului (până la "de" sau până la "disponibile")
+      const match = title.match(/^(.*?)(?= de | disponibile)/);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+    return title;
+  };
+
   const fetchCollection = async () => {
     setIsLoading(true);
     setError(false);
@@ -43,9 +56,13 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
         setError(true);
       } else {
         setBooks(collection.books);
-        // Update collection title if AI generated a better one
+        // Actualizează titlul colecției și aplică simplificarea
         if (collection.title && collection.title.length > 0) {
-          setCollectionTitle(collection.title);
+          const simplifiedTitle = simplifyCollectionTitle(collection.title);
+          setCollectionTitle(simplifiedTitle);
+        } else {
+          // Dacă nu avem un titlu generat, folosim titlul original simplificat
+          setCollectionTitle(simplifyCollectionTitle(title));
         }
         console.log(`Successfully loaded collection "${collection.title}" with ${collection.books.length} books`);
       }
