@@ -14,7 +14,10 @@ export const fetchRealBooksFromRecommendations = async (recommendations: Array<{
     "Jane Austen", "Charles Dickens", "Mark Twain", "Fyodor Dostoyevsky", 
     "Leo Tolstoy", "Victor Hugo", "Herman Melville", "Oscar Wilde",
     "William Shakespeare", "Jules Verne", "H.G. Wells", "Edgar Allan Poe",
-    "Lewis Carroll", "Mary Shelley", "Bram Stoker", "Homer", "Plato"
+    "Lewis Carroll", "Mary Shelley", "Bram Stoker", "Homer", "Plato",
+    "Aristotle", "Alexandre Dumas", "Arthur Conan Doyle", "Brothers Grimm",
+    "Hans Christian Andersen", "Jack London", "Rudyard Kipling", "Louisa May Alcott",
+    "Nathaniel Hawthorne", "Henry James", "Kate Chopin", "Franz Kafka"
   ];
   
   // Sort recommendations so that books by priority authors come first
@@ -72,6 +75,7 @@ export const fetchRealBooksFromRecommendations = async (recommendations: Array<{
       try {
         const response = await fetchBooks({
           search: category,
+          sort: "popular",
           limit: 5,
         });
         
@@ -147,11 +151,15 @@ export const fetchBookFromGutenberg = async (title: string, author: string): Pro
       
       // Strategy 5: Author only
       async () => {
-        const response = await fetchBooks({
-          search: author,
-          limit: 1,
-        });
-        return response.results?.length > 0 ? response.results[0] : null;
+        const authorLastName = author.split(' ').pop() || author;
+        if (authorLastName.length > 3) {
+          const response = await fetchBooks({
+            search: authorLastName,
+            limit: 1,
+          });
+          return response.results?.length > 0 ? response.results[0] : null;
+        }
+        return null;
       }
     ];
     
@@ -222,7 +230,17 @@ export const getFallbackCollection = async (prompt: string): Promise<{ title: st
       "povesti": "stories",
       "science": "science",
       "stiinta": "science",
-      "fictiune": "fiction"
+      "fictiune": "fiction",
+      "carti": "books",
+      "literatura": "literature",
+      "victoriana": "victorian",
+      "rusă": "russian",
+      "rusa": "russian",
+      "mitologie": "mythology",
+      "groază": "horror",
+      "groaza": "horror",
+      "detective": "detective",
+      "politiste": "mystery"
     };
     
     // Check if any of the Romanian words are in our map
@@ -238,6 +256,7 @@ export const getFallbackCollection = async (prompt: string): Promise<{ title: st
     const response = await fetchBooks({
       search: category,
       limit: 20,
+      sort: "popular"
     });
 
     return {

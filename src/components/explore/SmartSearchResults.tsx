@@ -51,9 +51,10 @@ export const SmartSearchResults: React.FC<SmartSearchResultsProps> = ({ collecti
                         src={coverImage}
                         alt={`Coperta pentru ${book.title}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                         onError={(e) => {
-                          // If image fails to load, replace with fallback
-                          (e.target as HTMLImageElement).src = "/placeholder.svg";
+                          // If image fails to load, replace with placeholder
+                          (e.target as HTMLImageElement).src = getPlaceholderBookCover(book.title);
                         }}
                       />
                     ) : (
@@ -61,6 +62,14 @@ export const SmartSearchResults: React.FC<SmartSearchResultsProps> = ({ collecti
                         <BookIcon className="h-12 w-12 text-muted-foreground" />
                       </div>
                     )}
+                    <div className="absolute bottom-2 right-2 z-20">
+                      <span className="bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                        {book.download_count > 1000 
+                          ? `${Math.round(book.download_count/1000)}k` 
+                          : book.download_count} 
+                        {book.download_count === 1 ? ' citire' : ' citiri'}
+                      </span>
+                    </div>
                   </CardContent>
                   <div className="p-3">
                     <h3 className="font-medium text-sm line-clamp-2">{book.title}</h3>

@@ -81,96 +81,96 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
   );
 };
 
-// Enhanced list of prompts more relevant to Gutenberg's public domain books
+// Enhanced list of prompts specifically targeted to Gutenberg's public domain books
 const ALL_COLLECTION_PROMPTS = [
   {
     title: "Capodopere literare universale",
-    prompt: "cele mai importante 20 de capodopere literare universale din toate timpurile disponibile în domeniul public",
+    prompt: "cele mai importante 15 capodopere literare universale disponibile în Project Gutenberg de Jane Austen, Charles Dickens, Mark Twain, Fyodor Dostoyevsky, Leo Tolstoy, și Victor Hugo",
     icon: <BookIcon className="h-5 w-5" />
   },
   {
     title: "Aventuri extraordinare",
-    prompt: "cele mai bune 20 de romane de aventură clasice din domeniul public precum Jules Verne, H.G. Wells, Robert Louis Stevenson",
+    prompt: "15 romane clasice de aventură din Gutenberg de Jules Verne, H.G. Wells, Robert Louis Stevenson și Alexandre Dumas",
     icon: <BookOpen className="h-5 w-5" />
   },
   {
     title: "Esențiale Literatura Victoriană",
-    prompt: "20 de cărți esențiale din perioada victoriană de autori ca Charles Dickens, Jane Austen, Charlotte Brontë",
+    prompt: "15 cărți esențiale din perioada victoriană de Charles Dickens, Jane Austen, Charlotte Brontë, William Makepeace Thackeray și George Eliot",
     icon: <BookText className="h-5 w-5" />
   },
   {
     title: "Romane de dragoste clasice",
-    prompt: "cele mai frumoase 20 de romane de dragoste clasice din domeniul public, Jane Austen, Charlotte Brontë",
+    prompt: "15 cele mai frumoase romane de dragoste clasice din Gutenberg de Jane Austen, Charlotte Brontë, Emily Brontë și Elizabeth Gaskell",
     icon: <Star className="h-5 w-5" />
   },
   {
     title: "Filosofie fundamentală",
-    prompt: "20 de lucrări fundamentale de filosofie din domeniul public precum Platon, Aristotel, Kant, Nietzsche",
+    prompt: "15 lucrări fundamentale de filosofie din Gutenberg de Platon, Aristotel, Kant, Nietzsche, John Stuart Mill și Seneca",
     icon: <Sparkles className="h-5 w-5" />
   },
   {
     title: "Mitologie și legende",
-    prompt: "20 de cărți clasice importante despre mitologie și legende din domeniul public",
+    prompt: "15 cărți clasice despre mitologie și legende din Gutenberg, incluzând Homer, Virgil, Ovidiu și Thomas Bulfinch",
     icon: <Layers className="h-5 w-5" />
   },
   {
     title: "Shakespeare și teatru clasic",
-    prompt: "20 de opere dramatice importante de William Shakespeare și alți dramaturgi clasici din domeniul public",
+    prompt: "15 cele mai importante opere dramatice de William Shakespeare în Gutenberg",
     icon: <BookOpenCheck className="h-5 w-5" />
   },
   {
     title: "Poezie clasică de referință",
-    prompt: "20 cele mai importante colecții de poezii clasice din domeniul public, de poeți celebri",
+    prompt: "15 cele mai importante colecții de poezii clasice din Gutenberg, de Walt Whitman, Emily Dickinson, John Keats, Lord Byron și William Wordsworth",
     icon: <Star className="h-5 w-5" />
   },
   {
     title: "Clasici americani",
-    prompt: "20 de romane americane clasice esențiale din domeniul public, Mark Twain, Herman Melville, Jack London, Edgar Allan Poe",
+    prompt: "15 romane americane clasice din Gutenberg de Mark Twain, Herman Melville, Nathaniel Hawthorne, Jack London și Edgar Allan Poe",
     icon: <BookText className="h-5 w-5" />
   },
   {
     title: "Mari biografii și memorii",
-    prompt: "20 de biografii și autobiografii clasice importante din domeniul public",
+    prompt: "15 biografii și autobiografii clasice din Gutenberg precum Autobiografia lui Benjamin Franklin, Viețile lui Plutarh și Memoriile generalului Grant",
     icon: <BookOpen className="h-5 w-5" />
   },
   {
     title: "Mistere și romane polițiste",
-    prompt: "20 de cărți clasice de mister și detective din domeniul public, Arthur Conan Doyle, Wilkie Collins, Edgar Allan Poe",
+    prompt: "15 cărți clasice de detectivi și mister din Gutenberg de Arthur Conan Doyle, Wilkie Collins, Edgar Allan Poe și Gaston Leroux",
     icon: <Grid2x2 className="h-5 w-5" />
   },
   {
     title: "Științe și explorare",
-    prompt: "20 de cărți clasice despre știință, natură și explorare din domeniul public precum Charles Darwin, Alexander von Humboldt",
+    prompt: "15 cărți clasice despre știință și explorare din Gutenberg de Charles Darwin, Alexander von Humboldt, și Thomas Henry Huxley",
     icon: <Layers className="h-5 w-5" />
   },
   {
     title: "Science Fiction pionier",
-    prompt: "20 de romane science fiction clasice din domeniul public, H.G. Wells, Jules Verne, Mary Shelley",
+    prompt: "15 romane science fiction clasice din Gutenberg de H.G. Wells, Jules Verne, Mary Shelley și Edward Bellamy",
     icon: <BookOpenCheck className="h-5 w-5" />
   },
   {
     title: "Clasici ruși fundamentali",
-    prompt: "20 de opere esențiale din literatura rusă clasică din domeniul public, Dostoievski, Tolstoi, Cehov, Gogol",
+    prompt: "15 opere esențiale din literatura rusă clasică din Gutenberg de Dostoievski, Tolstoi, Cehov, Gogol și Turgenev",
     icon: <Library className="h-5 w-5" />
   },
   {
     title: "Călătorii și explorări",
-    prompt: "20 de cărți clasice despre explorări și călătorii din domeniul public",
+    prompt: "15 cărți clasice despre explorări și călătorii din Gutenberg precum Robinson Crusoe, Călătoriile lui Gulliver, și jurnalele căpitanului Cook",
     icon: <BookIcon className="h-5 w-5" />
   },
   {
     title: "Literatura pentru copii",
-    prompt: "20 de cărți clasice pentru copii din domeniul public, Lewis Carroll, L. Frank Baum, Brothers Grimm, Hans Christian Andersen",
+    prompt: "15 cărți clasice pentru copii din Gutenberg de Lewis Carroll, L. Frank Baum, Brothers Grimm, Hans Christian Andersen și Carlo Collodi",
     icon: <BookText className="h-5 w-5" />
   },
   {
     title: "Opere filosofice antice",
-    prompt: "20 de opere filosofice antice din domeniul public, Platon, Aristotel, Seneca, Marcus Aurelius",
+    prompt: "15 opere filosofice antice din Gutenberg de Platon, Aristotel, Epictet, Seneca, Marcus Aurelius și Lucretius",
     icon: <Sparkles className="h-5 w-5" />
   },
   {
     title: "Romane gotice și de groază",
-    prompt: "20 de romane gotice și de groază clasice din domeniul public, Mary Shelley, Bram Stoker, Edgar Allan Poe",
+    prompt: "15 romane gotice și de groază clasice din Gutenberg de Mary Shelley, Bram Stoker, Edgar Allan Poe, Ann Radcliffe și Matthew Gregory Lewis",
     icon: <BookOpen className="h-5 w-5" />
   }
 ];
