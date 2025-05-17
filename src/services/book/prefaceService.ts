@@ -1,6 +1,6 @@
 
 import { Book } from "@/types/gutendex";
-import { callPerplexityApi } from "../api/perplexityApiService";
+import { callDeepSeekApi } from "../api/deepSeekApiService";
 import { hasValidApiKey } from "../api/perplexityApiConfig";
 
 // Generate an AI-powered preface for a book
@@ -20,7 +20,7 @@ export const generateBookPreface = async (book: Book): Promise<string> => {
       Nu include fraze precum "Iată prefața" sau orice alt text meta care nu ar apărea într-o prefață reală.
     `;
 
-    const response = await callPerplexityApi(prompt);
+    const response = await callDeepSeekApi(prompt);
     return response.trim();
   } catch (error) {
     console.error("Error generating book preface:", error);
