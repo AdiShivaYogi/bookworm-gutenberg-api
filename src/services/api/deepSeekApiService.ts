@@ -1,7 +1,7 @@
 
 import { getPerplexityApiKey, getPerplexityApiUrl } from './perplexityApiConfig';
 
-export interface DeepSeekResponse {
+export interface DeepSeekApiResponse {
   choices: {
     message: {
       content: string;
@@ -40,7 +40,7 @@ export const callDeepSeekApi = async (prompt: string): Promise<string> => {
       throw new Error(`API request failed: ${response.statusText}`);
     }
 
-    const data: DeepSeekResponse = await response.json();
+    const data: DeepSeekApiResponse = await response.json();
     return data.choices[0]?.message.content || "";
   } catch (error) {
     console.error("Failed to call DeepSeek API:", error);
