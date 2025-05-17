@@ -22,6 +22,13 @@ export const createPersonalizedCollection = async (
       Include a mix of titles and make sure to include author's full names.
       Avoid modern books, obscure works, or anything published after 1927.
       
+      For this specific request: "${prompt}", focus on these aspects:
+      - Consider the literary period most relevant to this theme
+      - Include a good variety of authors and nationalities
+      - Prioritize works that are considered masterpieces or highly significant
+      - Include some lesser-known gems that fit the theme perfectly
+      - Consider how these books relate to each other thematically
+      
       Format your response as a JSON object with "title" and "books" properties.
       The "books" property should be an array of objects with "title" and "author" properties.
       Only include the JSON in your response, nothing else.
@@ -48,8 +55,12 @@ export const createPersonalizedCollection = async (
       const title = collection.title;
       const recommendedBooks = collection.books;
       
+      console.log(`Generated collection "${title}" with ${recommendedBooks.length} recommendations`);
+      
       // Fetch real books from Gutenberg for each recommended book
       const realBooks = await fetchRealBooksFromRecommendations(recommendedBooks);
+      
+      console.log(`Found ${realBooks.length} real books in Gutenberg matching recommendations`);
       
       return {
         title,
