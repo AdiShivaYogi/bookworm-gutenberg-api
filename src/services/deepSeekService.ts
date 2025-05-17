@@ -1,5 +1,5 @@
-
 import { Book } from "@/types/gutendex";
+import { fetchBooks } from "./bookService";
 
 // DeepSeek API configuration
 const DEEPSEEK_API_KEY = "sk-4cc3458c366347a3bd3c3aa09289ceef";
@@ -73,11 +73,12 @@ export const generateSimilarBooksRecommendation = async (
 export const createPersonalizedCollection = async (
   prompt: string,
   numberOfBooks: number = 8
-): Promise<{ title: string; books: string[] }> => {
+): Promise<{ title: string; books: Array<any> }> => {
   try {
     const apiPrompt = `
       Create a personalized book collection based on this request: "${prompt}".
       Generate a title for this collection and recommend ${numberOfBooks} books that match the criteria.
+      Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
       Format your response as a JSON object with "title" and "books" properties.
       The "books" property should be an array of objects with "title" and "author" properties.
       Only include the JSON in your response, nothing else.
@@ -114,9 +115,17 @@ export const createPersonalizedCollection = async (
       const jsonMatch = content.match(/\{.*\}/s);
       const jsonContent = jsonMatch ? jsonMatch[0] : content;
       const collection = JSON.parse(jsonContent);
+      
+      // Try to find real books from Gutenberg matching the AI recommendations
+      const title = collection.title;
+      const recommendedBooks = collection.books;
+      
+      // Fetch real books from Gutenberg for each recommended book
+      const realBooks = await fetchRealBooksFromRecommendations(recommendedBooks);
+      
       return {
-        title: collection.title,
-        books: collection.books
+        title,
+        books: realBooks
       };
     } catch (parseError) {
       console.error("Failed to parse DeepSeek response:", parseError);
@@ -132,4 +141,30 @@ export const createPersonalizedCollection = async (
       books: []
     };
   }
+};
+
+// Fetch real books from Gutenberg based on AI recommendations
+const fetchRealBooksFromRecommendations = async (recommendations: Array<{title: string, author: string}>) => {
+  const books: Array<Book> = [];
+  
+  // Process books sequentially to avoid overloading the API
+  for (const rec of recommendations) {
+    try {
+      // Search for each book in Gutenberg
+      const searchQuery = `${rec.title} ${rec.author}`;
+      const response = await fetchBooks({
+        search: searchQuery,
+        limit: 1,
+      });
+      
+      // Add the book if found
+      if (response.results && response.results.length > 0) {
+        books.push(response.results[0]);
+      }
+    } catch (error) {
+      console.error(`Error fetching book "${rec.title}":`, error);
+    }
+  }
+  
+  return books;
 };

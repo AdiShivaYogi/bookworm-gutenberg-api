@@ -1,4 +1,3 @@
-
 import { BookListResponse, Book } from "../types/gutendex";
 
 const API_URL = "https://gutendex.com";
@@ -9,6 +8,7 @@ interface BookQueryParams {
   topic?: string;
   sort?: "popular" | "ascending" | "descending";
   page?: number;
+  limit?: number;
 }
 
 export const fetchBooks = async (params: BookQueryParams = {}): Promise<BookListResponse> => {
@@ -20,6 +20,7 @@ export const fetchBooks = async (params: BookQueryParams = {}): Promise<BookList
     if (params.topic) queryParams.append("topic", params.topic);
     if (params.sort) queryParams.append("sort", params.sort);
     if (params.page) queryParams.append("page", params.page.toString());
+    if (params.limit) queryParams.append("limit", params.limit.toString());
     
     const url = `${API_URL}/books?${queryParams.toString()}`;
     const response = await fetch(url);
