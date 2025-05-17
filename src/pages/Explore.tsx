@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,14 +13,16 @@ import { ExploreSEO } from '@/components/explore/ExploreSEO';
 import { ExplorePagination } from '@/components/explore/ExplorePagination';
 import { getApiTopicFromList } from '@/components/explore/ExploreUtils';
 import { useToast } from '@/hooks/use-toast';
-import { createPersonalizedCollection } from '@/services/deepSeekService';
+import { createPersonalizedCollection, hasValidApiKey } from '@/services/deepSeekService';
 import { SmartSearchResults } from '@/components/explore/SmartSearchResults';
+import { ApiKeyConfig } from '@/components/explore/ApiKeyConfig';
 import { Book } from '@/types/gutendex';
 
 const Explore = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [smartSearchResults, setSmartSearchResults] = useState<{ title: string; books: Book[] } | null>(null);
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
   
   const {
     filters,
@@ -32,6 +34,11 @@ const Explore = () => {
     toggleSmartSearch
   } = useExploreFilters();
 
+  useEffect(() => {
+    // Verificăm dacă există o cheie API configurată
+    setApiKeyConfigured(hasValidApiKey());
+  }, []);
+  
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['books', filters.selectedLanguage, filters.sortOrder, filters.currentPage, filters.searchQuery, filters.topicFilter, filters.selectedList],
     queryFn: () => fetchBooks({
@@ -46,6 +53,15 @@ const Explore = () => {
 
   const handleSmartSearch = async () => {
     if (!filters.searchQuery) return;
+    
+    if (!apiKeyConfigured) {
+      toast({
+        title: "Configurare necesară",
+        description: "Trebuie să configurezi o cheie API Perplexity pentru a putea folosi căutarea inteligentă.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsGenerating(true);
     setSmartSearchResults(null);
@@ -64,7 +80,7 @@ const Explore = () => {
       console.error("Error generating collection:", error);
       toast({
         title: "Eroare",
-        description: "Nu am putut genera colecția. Încearcă din nou mai târziu.",
+        description: "Nu am putut genera colecția. Verifică cheia API și încearcă din nou mai târziu.",
         variant: "destructive",
       });
     } finally {
@@ -89,6 +105,9 @@ const Explore = () => {
           onPopularListSelect={handlePopularListSelect}
         />
         
+        {/* Config API pentru funcțiile AI */}
+        <ApiKeyConfig />
+        
         {(isLoading || isFetching) && (
           <div className="flex justify-center my-12">
             <Button disabled variant="ghost" className="gap-2">
@@ -109,7 +128,7 @@ const Explore = () => {
             </p>
             <Button 
               onClick={handleSmartSearch} 
-              disabled={isGenerating}
+              disabled={isGenerating || !apiKeyConfigured}
               className="gap-2"
             >
               {isGenerating ? (

@@ -2,9 +2,9 @@
 import { Book } from "@/types/gutendex";
 import { fetchBooks } from "./bookService";
 
-// DeepSeek API configuration
-const DEEPSEEK_API_KEY = "sk-4cc3458c366347a3bd3c3aa09289ceef";
-const DEEPSEEK_API_URL = "https://api.perplexity.ai/chat/completions";
+// Configurare API
+let PERPLEXITY_API_KEY = ""; // Cheia va fi setată dinamic
+const PERPLEXITY_API_URL = "https://api.perplexity.ai/chat/completions";
 
 export interface DeepSeekResponse {
   choices: {
@@ -14,94 +14,52 @@ export interface DeepSeekResponse {
   }[];
 }
 
-// Generate similar books recommendations
-export const generateSimilarBooksRecommendation = async (
-  book: Book,
-  numberOfRecommendations: number = 10
-): Promise<Book[]> => {
-  try {
-    const prompt = `
-      I have just read "${book.title}" by ${book.authors.map(a => a.name).join(', ')}.
-      Based on this book, please recommend ${numberOfRecommendations} similar books with their titles and authors.
-      Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
-      The books should have similar themes, style, or subject matter.
-      Format your response as a JSON array of objects with "title" and "author" properties.
-      Only include the JSON in your response, nothing else.
-    `;
+export interface PerplexityConfig {
+  apiKey: string;
+}
 
-    const response = await fetch(DEEPSEEK_API_URL, {
+// Funcție pentru setarea cheii API
+export const setPerplexityApiKey = (apiKey: string) => {
+  PERPLEXITY_API_KEY = apiKey;
+  localStorage.setItem('perplexity_api_key', apiKey);
+};
+
+// Funcție pentru a obține cheia API
+export const getPerplexityApiKey = (): string => {
+  if (!PERPLEXITY_API_KEY) {
+    const storedKey = localStorage.getItem('perplexity_api_key');
+    if (storedKey) {
+      PERPLEXITY_API_KEY = storedKey;
+    }
+  }
+  return PERPLEXITY_API_KEY;
+};
+
+// Verifică dacă există un API key valid
+export const hasValidApiKey = (): boolean => {
+  return !!getPerplexityApiKey();
+};
+
+// Funcție generală pentru a face apeluri către API
+const callPerplexityApi = async (prompt: string): Promise<string> => {
+  const apiKey = getPerplexityApiKey();
+  if (!apiKey) {
+    throw new Error("API key is required");
+  }
+
+  try {
+    const response = await fetch(PERPLEXITY_API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "llama-3.1-sonar-small-128k-online", // Model mai robust
         messages: [
           {
             role: "user",
             content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
-    }
-
-    const data: DeepSeekResponse = await response.json();
-    const content = data.choices[0]?.message.content;
-
-    try {
-      // Extract the JSON part from the response
-      const jsonMatch = content.match(/\[\s*\{.*\}\s*\]/s);
-      const jsonContent = jsonMatch ? jsonMatch[0] : content;
-      const recommendations = JSON.parse(jsonContent);
-      
-      // Fetch real books from Gutenberg for each recommended book
-      const realBooks = await fetchRealBooksFromRecommendations(recommendations);
-      return realBooks;
-    } catch (parseError) {
-      console.error("Failed to parse DeepSeek response:", parseError);
-      return [];
-    }
-  } catch (error) {
-    console.error("Failed to generate recommendations:", error);
-    return [];
-  }
-};
-
-// Create a personalized collection based on user input
-export const createPersonalizedCollection = async (
-  prompt: string,
-  numberOfBooks: number = 20
-): Promise<{ title: string; books: Array<Book> }> => {
-  try {
-    const apiPrompt = `
-      Create a personalized book collection based on this request: "${prompt}".
-      Generate a title for this collection and recommend ${numberOfBooks} books that match the criteria.
-      IMPORTANT: Make sure the title accurately reflects the content and doesn't promise more books than what will be shown (around ${numberOfBooks} books).
-      Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
-      Format your response as a JSON object with "title" and "books" properties.
-      The "books" property should be an array of objects with "title" and "author" properties.
-      Only include the JSON in your response, nothing else.
-    `;
-
-    const response = await fetch(DEEPSEEK_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [
-          {
-            role: "user",
-            content: apiPrompt
           }
         ],
         temperature: 0.7,
@@ -114,7 +72,75 @@ export const createPersonalizedCollection = async (
     }
 
     const data: DeepSeekResponse = await response.json();
-    const content = data.choices[0]?.message.content;
+    return data.choices[0]?.message.content || "";
+  } catch (error) {
+    console.error("Failed to call Perplexity API:", error);
+    throw error;
+  }
+};
+
+// Generate similar books recommendations
+export const generateSimilarBooksRecommendation = async (
+  book: Book,
+  numberOfRecommendations: number = 10
+): Promise<Book[]> => {
+  try {
+    const apiKey = getPerplexityApiKey();
+    if (!apiKey) {
+      return await getFallbackRecommendations(book);
+    }
+
+    const prompt = `
+      I have just read "${book.title}" by ${book.authors.map(a => a.name).join(', ')}.
+      Based on this book, please recommend ${numberOfRecommendations} similar books with their titles and authors.
+      Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
+      Format your response as a JSON array of objects with "title" and "author" properties.
+      Only include the JSON in your response, nothing else.
+    `;
+
+    const content = await callPerplexityApi(prompt);
+
+    try {
+      // Extract the JSON part from the response
+      const jsonMatch = content.match(/\[\s*\{.*\}\s*\]/s);
+      const jsonContent = jsonMatch ? jsonMatch[0] : content;
+      const recommendations = JSON.parse(jsonContent);
+      
+      // Fetch real books from Gutenberg for each recommended book
+      const realBooks = await fetchRealBooksFromRecommendations(recommendations);
+      return realBooks;
+    } catch (parseError) {
+      console.error("Failed to parse API response:", parseError);
+      return await getFallbackRecommendations(book);
+    }
+  } catch (error) {
+    console.error("Failed to generate recommendations:", error);
+    return await getFallbackRecommendations(book);
+  }
+};
+
+// Create a personalized collection based on user input
+export const createPersonalizedCollection = async (
+  prompt: string,
+  numberOfBooks: number = 20
+): Promise<{ title: string; books: Array<Book> }> => {
+  try {
+    const apiKey = getPerplexityApiKey();
+    if (!apiKey) {
+      return await getFallbackCollection(prompt);
+    }
+
+    const apiPrompt = `
+      Create a personalized book collection based on this request: "${prompt}".
+      Generate a title for this collection and recommend ${numberOfBooks} books that match the criteria.
+      IMPORTANT: Make sure the title accurately reflects the content and doesn't promise more books than what will be shown (around ${numberOfBooks} books).
+      Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
+      Format your response as a JSON object with "title" and "books" properties.
+      The "books" property should be an array of objects with "title" and "author" properties.
+      Only include the JSON in your response, nothing else.
+    `;
+
+    const content = await callPerplexityApi(apiPrompt);
 
     try {
       // Extract the JSON part from the response
@@ -134,16 +160,60 @@ export const createPersonalizedCollection = async (
         books: realBooks
       };
     } catch (parseError) {
-      console.error("Failed to parse DeepSeek response:", parseError);
-      return {
-        title: "Colecție personalizată",
-        books: []
-      };
+      console.error("Failed to parse API response:", parseError);
+      return await getFallbackCollection(prompt);
     }
   } catch (error) {
     console.error("Failed to create personalized collection:", error);
+    return await getFallbackCollection(prompt);
+  }
+};
+
+// Fallback pentru recomandări prin căutare directă în Gutenberg
+const getFallbackRecommendations = async (book: Book): Promise<Book[]> => {
+  try {
+    // Folosim titlul și autorul pentru a găsi cărți similare
+    const authorName = book.authors[0]?.name || "";
+    const response = await fetchBooks({
+      search: authorName,
+      limit: 10,
+    });
+
+    if (response.results && response.results.length > 0) {
+      return response.results;
+    }
+
+    // Dacă nu găsim nimic după autor, încercăm cu titlul
+    const titleWords = book.title.split(' ').slice(0, 2).join(' ');
+    const titleResponse = await fetchBooks({
+      search: titleWords,
+      limit: 10,
+    });
+
+    return titleResponse.results || [];
+  } catch (error) {
+    console.error("Fallback recommendation error:", error);
+    return [];
+  }
+};
+
+// Fallback pentru colecții prin căutare directă în Gutenberg
+const getFallbackCollection = async (prompt: string): Promise<{ title: string; books: Array<Book> }> => {
+  try {
+    const searchWords = prompt.split(' ').slice(0, 3).join(' ');
+    const response = await fetchBooks({
+      search: searchWords,
+      limit: 20,
+    });
+
     return {
-      title: "Colecție personalizată",
+      title: `Colecție de cărți pentru "${prompt}"`,
+      books: response.results || []
+    };
+  } catch (error) {
+    console.error("Fallback collection error:", error);
+    return {
+      title: `Colecție de cărți pentru "${prompt}"`,
       books: []
     };
   }

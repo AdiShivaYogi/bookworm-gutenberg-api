@@ -1,51 +1,50 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from 'lucide-react';
 
 interface CollectionFormProps {
   onSubmit: (prompt: string) => void;
   onCancel: () => void;
   isLoading: boolean;
+  disabled?: boolean;
 }
 
-const CollectionForm: React.FC<CollectionFormProps> = ({ onSubmit, onCancel, isLoading }) => {
-  const [prompt, setPrompt] = useState("");
-
+const CollectionForm: React.FC<CollectionFormProps> = ({ 
+  onSubmit, 
+  onCancel, 
+  isLoading,
+  disabled = false
+}) => {
+  const [prompt, setPrompt] = useState('');
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim()) {
+    if (prompt.trim() && !disabled) {
       onSubmit(prompt);
     }
   };
-
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="collection-prompt" className="text-sm font-medium block mb-1">
-          Descrie colecția dorită:
-        </label>
-        <Input 
-          id="collection-prompt"
-          placeholder="Ex: Cărți distopice similare cu 1984 de George Orwell"
+        <Textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          className="w-full"
-          disabled={isLoading}
-          autoFocus
+          placeholder="Descrie colecția de cărți pe care o dorești (ex: cărți clasice despre călătorii, romane de aventură, povești scurte misterioase...)"
+          className="resize-none min-h-[100px]"
+          disabled={isLoading || disabled}
         />
-        <p className="text-xs text-muted-foreground mt-1">
-          Poți menționa autori, genuri, teme sau cărți similare.
-        </p>
+        
+        {disabled && (
+          <p className="text-sm text-amber-600 mt-2">
+            Trebuie să configurezi o cheie API pentru a putea crea colecții personalizate.
+          </p>
+        )}
       </div>
       
-      <div className="flex gap-2">
-        <Button 
-          type="submit" 
-          disabled={isLoading || !prompt.trim()}
-        >
-          Creează colecția
-        </Button>
+      <div className="flex justify-end gap-2">
         <Button 
           type="button" 
           variant="outline" 
@@ -53,6 +52,19 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ onSubmit, onCancel, isL
           disabled={isLoading}
         >
           Anulează
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={!prompt.trim() || isLoading || disabled}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Se generează...
+            </>
+          ) : (
+            'Creează colecția'
+          )}
         </Button>
       </div>
     </form>

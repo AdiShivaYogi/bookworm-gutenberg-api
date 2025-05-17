@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Book } from '@/types/gutendex';
-import { generateSimilarBooksRecommendation, createPersonalizedCollection } from '@/services/deepSeekService';
+import { generateSimilarBooksRecommendation, createPersonalizedCollection, hasValidApiKey } from '@/services/deepSeekService';
 import { useToast } from '@/hooks/use-toast';
 
 export interface BookRecommendation {
@@ -25,6 +25,15 @@ export const useBookRecommendations = (book: Book | null) => {
   const getSimilarBooks = async () => {
     if (!book) return;
 
+    if (!hasValidApiKey()) {
+      toast({
+        title: "Configurare necesară",
+        description: "Trebuie să configurezi o cheie API Perplexity pentru a putea genera recomandări.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoadingRecommendations(true);
     try {
       const result = await generateSimilarBooksRecommendation(book);
@@ -32,13 +41,13 @@ export const useBookRecommendations = (book: Book | null) => {
       
       toast({
         title: "Recomandări generate",
-        description: "Am găsit cărți similare pentru tine!",
+        description: `Am găsit ${result.length} cărți similare pentru tine!`,
       });
     } catch (error) {
       console.error("Error getting recommendations:", error);
       toast({
         title: "Eroare",
-        description: "Nu am putut genera recomandări. Încearcă din nou mai târziu.",
+        description: "Nu am putut genera recomandări. Verifică cheia API și încearcă din nou mai târziu.",
         variant: "destructive",
       });
     } finally {
@@ -48,6 +57,15 @@ export const useBookRecommendations = (book: Book | null) => {
 
   // Create a personalized collection
   const createCollection = async (prompt: string) => {
+    if (!hasValidApiKey()) {
+      toast({
+        title: "Configurare necesară",
+        description: "Trebuie să configurezi o cheie API Perplexity pentru a putea crea colecții.",
+        variant: "destructive",
+      });
+      return null;
+    }
+
     setIsLoadingCollection(true);
     try {
       const result = await createPersonalizedCollection(prompt);
@@ -58,7 +76,7 @@ export const useBookRecommendations = (book: Book | null) => {
       
       toast({
         title: "Colecție creată",
-        description: `Colecția "${result.title}" a fost creată cu succes!`,
+        description: `Colecția "${result.title}" a fost creată cu succes cu ${result.books.length} cărți!`,
       });
 
       return result;
@@ -66,7 +84,7 @@ export const useBookRecommendations = (book: Book | null) => {
       console.error("Error creating collection:", error);
       toast({
         title: "Eroare",
-        description: "Nu am putut crea colecția. Încearcă din nou mai târziu.",
+        description: "Nu am putut crea colecția. Verifică cheia API și încearcă din nou mai târziu.",
         variant: "destructive",
       });
       return null;
