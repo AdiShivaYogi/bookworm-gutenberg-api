@@ -1,49 +1,22 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
-import BookGrid from '../components/BookGrid';
 import Footer from '../components/Footer';
-import { fetchBooks } from '../services/bookService';
-import { Book } from '../types/gutendex';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookText, Star, Bookmark, Search, Loader2 } from 'lucide-react';
-import SectionHeader from '../components/book/SectionHeader';
+import { ArrowRight, BookText, Search, Loader2 } from 'lucide-react';
 import { createPersonalizedCollection } from '@/services/deepSeekService';
 import { SmartSearchResults } from '@/components/explore/SmartSearchResults';
 import { useToast } from '@/hooks/use-toast';
+import { DynamicCollections } from '@/components/explore/DynamicCollections';
 
 const Index = () => {
   const { toast } = useToast();
-  const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
-  const [classicsBooks, setClassicsBooks] = useState<Book[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [showSmartSearch, setShowSmartSearch] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [smartCollection, setSmartCollection] = useState<{ title: string; books: Book[] } | null>(null);
+  const [smartCollection, setSmartCollection] = useState<{ title: string; books: any[] } | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchFeaturedBooks = async () => {
-      try {
-        setIsLoading(true);
-        // Get popular books
-        const popularData = await fetchBooks({ sort: 'popular' });
-        setFeaturedBooks(popularData.results.slice(0, 6));
-        
-        // Get classics (in this case, we'll use books with "fiction" in topics)
-        const classicsData = await fetchBooks({ topic: 'fiction' });
-        setClassicsBooks(classicsData.results.slice(0, 6));
-      } catch (error) {
-        console.error('Error fetching books for homepage:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFeaturedBooks();
-  }, []);
 
   const handleSearch = (query: string) => {
     navigate(`/explore?search=${encodeURIComponent(query)}`);
@@ -125,7 +98,10 @@ const Index = () => {
 
         <section className="container px-4 py-12 md:py-16">
           <div className="flex items-center justify-between mb-6">
-            <SectionHeader title="Cărți Populare" icon={<Star className="h-5 w-5" />} />
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <BookText className="h-6 w-6 text-primary" />
+              Colecții personalizate
+            </h2>
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" onClick={handleShowSmartSearch} className="gap-1 hidden md:flex">
                 <Search className="h-4 w-4" />
@@ -133,14 +109,19 @@ const Index = () => {
               </Button>
               <Button variant="link" asChild className="gap-1">
                 <a href="/explore">
-                  Vezi toate <ArrowRight className="h-4 w-4" />
+                  Explorează biblioteca <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
             </div>
           </div>
           
-          <BookGrid books={featuredBooks} isLoading={isLoading} />
+          <p className="text-muted-foreground mb-8">
+            Descoperă colecții unice de cărți generate cu AI, adaptate pentru fiecare cititor.
+          </p>
         </section>
+
+        {/* Înlocuim colecțiile statice cu colecții dinamice generate de AI */}
+        <DynamicCollections />
 
         <section className="container px-4 py-8 md:py-12">
           <div className="rounded-xl bg-gradient-to-br from-accent/10 to-primary/10 p-8 md:p-10 mb-16">
@@ -168,17 +149,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-          
-          <div className="flex items-center justify-between mb-6">
-            <SectionHeader title="Clasici de Ficțiune" icon={<Bookmark className="h-5 w-5" />} />
-            <Button variant="link" asChild className="gap-1">
-              <a href="/explore?topic=fiction">
-                Mai multă ficțiune <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-          
-          <BookGrid books={classicsBooks} isLoading={isLoading} />
         </section>
       </main>
       <Footer />
