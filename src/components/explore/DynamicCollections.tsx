@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book } from '@/types/gutendex';
-import { BookGrid } from '@/components/BookGrid';
+import BookGrid from '@/components/BookGrid';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Collection, Loader2 } from 'lucide-react';
+import { ArrowRight, BookOpen, Loader2 } from 'lucide-react';
 import SectionHeader from '@/components/book/SectionHeader';
 import { createPersonalizedCollection } from '@/services/deepSeekService';
 import { useToast } from '@/hooks/use-toast';
@@ -17,7 +17,7 @@ interface DynamicCollectionProps {
 export const DynamicCollection: React.FC<DynamicCollectionProps> = ({ 
   title, 
   prompt,
-  icon = <Collection className="h-5 w-5" />
+  icon = <BookOpen className="h-5 w-5" />
 }) => {
   const { toast } = useToast();
   const [books, setBooks] = useState<Book[]>([]);
@@ -72,17 +72,17 @@ export const DynamicCollections: React.FC = () => {
     {
       title: "Aventuri extraordinare",
       prompt: "cărți clasice de aventură cu călătorii extraordinare și explorări",
-      icon: <Collection className="h-5 w-5" />
+      icon: <BookOpen className="h-5 w-5" />
     },
     {
       title: "Mistere clasice",
       prompt: "cele mai bune cărți clasice de mister și detective din toate timpurile",
-      icon: <Collection className="h-5 w-5" />
+      icon: <BookOpen className="h-5 w-5" />
     },
     {
       title: "Iubire și romantism",
       prompt: "cele mai frumoase romane de dragoste clasice",
-      icon: <Collection className="h-5 w-5" />
+      icon: <BookOpen className="h-5 w-5" />
     }
   ];
 
