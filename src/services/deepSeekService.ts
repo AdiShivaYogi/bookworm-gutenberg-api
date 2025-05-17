@@ -1,9 +1,10 @@
+
 import { Book } from "@/types/gutendex";
 import { fetchBooks } from "./bookService";
 
 // DeepSeek API configuration
 const DEEPSEEK_API_KEY = "sk-4cc3458c366347a3bd3c3aa09289ceef";
-const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+const DEEPSEEK_API_URL = "https://api.perplexity.ai/chat/completions";
 
 export interface DeepSeekResponse {
   choices: {
@@ -72,12 +73,13 @@ export const generateSimilarBooksRecommendation = async (
 // Create a personalized collection based on user input
 export const createPersonalizedCollection = async (
   prompt: string,
-  numberOfBooks: number = 8
-): Promise<{ title: string; books: Array<any> }> => {
+  numberOfBooks: number = 20
+): Promise<{ title: string; books: Array<Book> }> => {
   try {
     const apiPrompt = `
       Create a personalized book collection based on this request: "${prompt}".
       Generate a title for this collection and recommend ${numberOfBooks} books that match the criteria.
+      IMPORTANT: Make sure the title accurately reflects the content and doesn't promise more books than what will be shown (around ${numberOfBooks} books).
       Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
       Format your response as a JSON object with "title" and "books" properties.
       The "books" property should be an array of objects with "title" and "author" properties.
@@ -99,7 +101,7 @@ export const createPersonalizedCollection = async (
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 1500
       }),
     });
 
@@ -146,25 +148,64 @@ export const createPersonalizedCollection = async (
 // Fetch real books from Gutenberg based on AI recommendations
 const fetchRealBooksFromRecommendations = async (recommendations: Array<{title: string, author: string}>) => {
   const books: Array<Book> = [];
+  const batchSize = 5;
+  const maxBooks = 20;
   
-  // Process books sequentially to avoid overloading the API
-  for (const rec of recommendations) {
-    try {
-      // Search for each book in Gutenberg
-      const searchQuery = `${rec.title} ${rec.author}`;
-      const response = await fetchBooks({
-        search: searchQuery,
-        limit: 1,
-      });
-      
-      // Add the book if found
-      if (response.results && response.results.length > 0) {
-        books.push(response.results[0]);
-      }
-    } catch (error) {
-      console.error(`Error fetching book "${rec.title}":`, error);
+  // Process recommendations in batches to avoid API rate limits
+  for (let i = 0; i < Math.min(recommendations.length, maxBooks); i += batchSize) {
+    const batch = recommendations.slice(i, i + batchSize);
+    const batchPromises = batch.map(rec => {
+      return fetchBookFromGutenberg(rec.title, rec.author);
+    });
+    
+    const batchResults = await Promise.all(batchPromises);
+    books.push(...batchResults.filter(book => book !== null));
+    
+    // Add a small delay between batches to be nice to the API
+    if (i + batchSize < recommendations.length) {
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
   }
   
   return books;
+};
+
+// Helper function to fetch a single book from Gutenberg
+const fetchBookFromGutenberg = async (title: string, author: string): Promise<Book | null> => {
+  try {
+    // First try with both title and author
+    let searchQuery = `${title} ${author}`;
+    let response = await fetchBooks({
+      search: searchQuery,
+      limit: 1,
+    });
+    
+    // If no results, try with just the title
+    if (!response.results || response.results.length === 0) {
+      searchQuery = title;
+      response = await fetchBooks({
+        search: searchQuery,
+        limit: 1,
+      });
+    }
+    
+    // If still no results, try with just the author
+    if (!response.results || response.results.length === 0) {
+      searchQuery = author;
+      response = await fetchBooks({
+        search: searchQuery,
+        limit: 1,
+      });
+    }
+    
+    // Return the book if found
+    if (response.results && response.results.length > 0) {
+      return response.results[0];
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error fetching book "${title}":`, error);
+    return null;
+  }
 };

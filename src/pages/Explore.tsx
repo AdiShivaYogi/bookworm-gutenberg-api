@@ -15,11 +15,12 @@ import { getApiTopicFromList } from '@/components/explore/ExploreUtils';
 import { useToast } from '@/hooks/use-toast';
 import { createPersonalizedCollection } from '@/services/deepSeekService';
 import { SmartSearchResults } from '@/components/explore/SmartSearchResults';
+import { Book } from '@/types/gutendex';
 
 const Explore = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [smartSearchResults, setSmartSearchResults] = useState(null);
+  const [smartSearchResults, setSmartSearchResults] = useState<{ title: string; books: Book[] } | null>(null);
   
   const {
     filters,
@@ -49,12 +50,13 @@ const Explore = () => {
     setSmartSearchResults(null);
     
     try {
-      const collection = await createPersonalizedCollection(filters.searchQuery);
+      // Increase number of books to 20
+      const collection = await createPersonalizedCollection(filters.searchQuery, 20);
       setSmartSearchResults(collection);
       
       toast({
         title: "Colecție generată",
-        description: "Am creat o colecție personalizată bazată pe cererea ta",
+        description: `Am creat colecția "${collection.title}" cu ${collection.books.length} cărți`,
       });
     } catch (error) {
       console.error("Error generating collection:", error);
