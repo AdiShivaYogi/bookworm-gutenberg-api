@@ -1,4 +1,3 @@
-
 import { getPerplexityApiKey, getPerplexityApiUrl } from './perplexityApiConfig';
 
 export interface DeepSeekApiResponse {
@@ -17,14 +16,16 @@ export const callDeepSeekApi = async (prompt: string): Promise<string> => {
   }
 
   try {
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    // Using Perplexity API instead of DeepSeek API since DeepSeek was failing with auth errors
+    // but keeping the function name the same to maintain compatibility
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: 'llama-3.1-sonar-small-128k-online',
         messages: [
           {
             role: "user",
