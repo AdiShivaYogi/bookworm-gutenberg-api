@@ -2,12 +2,11 @@
 import React, { useState } from 'react';
 import { Book } from '@/types/gutendex';
 import { generateBookPreface } from '@/services/book/prefaceService';
-import { hasValidApiKey } from '@/services/api/perplexityApiConfig';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, BookText } from 'lucide-react';
 import EmptyStateCard from '@/components/book/EmptyStateCard';
+import { useToast } from '@/hooks/use-toast';
 
 interface BookPrefaceProps {
   book: Book;
@@ -19,15 +18,6 @@ const BookPreface: React.FC<BookPrefaceProps> = ({ book }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleGeneratePreface = async () => {
-    if (!hasValidApiKey()) {
-      toast({
-        title: "Configurare necesară",
-        description: "Trebuie să configurezi o cheie API Perplexity pentru a genera o prefață.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       const generatedPreface = await generateBookPreface(book);
@@ -41,7 +31,7 @@ const BookPreface: React.FC<BookPrefaceProps> = ({ book }) => {
       console.error("Failed to generate preface:", error);
       toast({
         title: "Eroare",
-        description: "Nu am putut genera prefața. Verifică cheia API și încearcă din nou.",
+        description: "Nu am putut genera prefața. Încearcă din nou.",
         variant: "destructive",
       });
     } finally {

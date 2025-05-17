@@ -1,14 +1,9 @@
 
 import { Book } from "@/types/gutendex";
 import { callDeepSeekApi } from "../api/deepSeekApiService";
-import { hasValidApiKey } from "../api/perplexityApiConfig";
 
 // Generate an AI-powered preface for a book
 export const generateBookPreface = async (book: Book): Promise<string> => {
-  if (!hasValidApiKey()) {
-    throw new Error("API key is required for generating a preface");
-  }
-
   try {
     const authorInfo = book.authors.map(a => a.name).join(", ");
     
