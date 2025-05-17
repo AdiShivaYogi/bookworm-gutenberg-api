@@ -3,22 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { DynamicCollection } from './DynamicCollection';
 import { ALL_COLLECTION_PROMPTS } from './collectionPrompts';
 
-// Componenta ce conține toate colecțiile predefinite pentru pagina principală
+// Component that contains all predefined collections for the main page
 export const DynamicCollections: React.FC = () => {
-  // Selectează aleatoriu între 8-12 colecții diferite pentru afișare
-  const [selectedCollections, setSelectedCollections] = useState<Array<{
-    title: string;
-    prompt: string;
-    icon: React.ReactNode;
-  }>>([]);
+  // Randomly select between 8-12 different collections to display
+  const [selectedCollections, setSelectedCollections] = useState(ALL_COLLECTION_PROMPTS.slice(0, 0));
 
-  // Regenerează colecțiile la fiecare reîncărcare a paginii
+  // Regenerate collections on each page reload
   useEffect(() => {
-    // Amestecă lista de prompturi pentru a obține o selecție aleatorie
+    // Shuffle the list of prompts to get a random selection
     const shuffledPrompts = [...ALL_COLLECTION_PROMPTS].sort(() => Math.random() - 0.5);
     
-    // Selectează între 8 și 12 prompturi
-    const numberOfCollections = Math.floor(Math.random() * 5) + 8; // 8-12 colecții
+    // Select between 8 and 12 prompts
+    const numberOfCollections = Math.floor(Math.random() * 5) + 8; // 8-12 collections
     console.log(`Generating ${numberOfCollections} random collections`);
     setSelectedCollections(shuffledPrompts.slice(0, numberOfCollections));
   }, []);

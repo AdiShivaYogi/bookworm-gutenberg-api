@@ -3,21 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { Book } from '@/types/gutendex';
 import BookGrid from '@/components/BookGrid';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import SectionHeader from '@/components/book/SectionHeader';
 import { createPersonalizedCollection } from '@/services/book/collectionService';
 import { useToast } from '@/hooks/use-toast';
+import { LucideIcon } from 'lucide-react';
 
 interface DynamicCollectionProps {
   title: string;
   prompt: string;
-  icon?: React.ReactNode;
+  icon: LucideIcon;
 }
 
 export const DynamicCollection: React.FC<DynamicCollectionProps> = ({ 
   title, 
   prompt,
-  icon = <BookOpen className="h-5 w-5" />
+  icon
 }) => {
   const { toast } = useToast();
   const [books, setBooks] = useState<Book[]>([]);
@@ -65,10 +66,16 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
     return null;
   }
 
+  // Create icon element with className
+  const IconComponent = icon;
+  
   return (
     <section className="container px-4 py-8 md:py-12">
       <div className="flex items-center justify-between mb-6">
-        <SectionHeader title={collectionTitle} icon={icon} />
+        <SectionHeader 
+          title={collectionTitle} 
+          icon={<IconComponent className="h-5 w-5" />} 
+        />
         <Button variant="link" asChild className="gap-1">
           <a href="/explore">
             Vezi toate <ArrowRight className="h-4 w-4" />
