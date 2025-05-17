@@ -11,12 +11,12 @@ export interface BookRecommendation {
 
 export interface BookCollection {
   title: string;
-  books: BookRecommendation[];
+  books: Book[] | BookRecommendation[];
 }
 
 export const useBookRecommendations = (book: Book | null) => {
   const { toast } = useToast();
-  const [recommendations, setRecommendations] = useState<BookRecommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<Book[]>([]);
   const [collection, setCollection] = useState<BookCollection | null>(null);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [isLoadingCollection, setIsLoadingCollection] = useState(false);
@@ -28,15 +28,7 @@ export const useBookRecommendations = (book: Book | null) => {
     setIsLoadingRecommendations(true);
     try {
       const result = await generateSimilarBooksRecommendation(book);
-      // Fix TypeScript error by ensuring we transform the result to match BookRecommendation interface
-      const formattedRecommendations: BookRecommendation[] = Array.isArray(result) 
-        ? result.map((item: any) => ({
-            title: item.title || "Unknown title",
-            author: item.author || "Unknown author"
-          }))
-        : [];
-      
-      setRecommendations(formattedRecommendations);
+      setRecommendations(result);
       
       toast({
         title: "Recomandări generate",
@@ -61,7 +53,7 @@ export const useBookRecommendations = (book: Book | null) => {
       const result = await createPersonalizedCollection(prompt);
       setCollection({
         title: result.title,
-        books: result.books as unknown as BookRecommendation[]
+        books: result.books
       });
       
       toast({

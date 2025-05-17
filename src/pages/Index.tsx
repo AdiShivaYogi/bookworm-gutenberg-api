@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -7,18 +8,20 @@ import Footer from '../components/Footer';
 import { fetchBooks } from '../services/bookService';
 import { Book } from '../types/gutendex';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookText, Star, Bookmark, Search } from 'lucide-react';
+import { ArrowRight, BookText, Star, Bookmark, Search, Loader2 } from 'lucide-react';
 import SectionHeader from '../components/book/SectionHeader';
 import { createPersonalizedCollection } from '@/services/deepSeekService';
 import { SmartSearchResults } from '@/components/explore/SmartSearchResults';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
+  const { toast } = useToast();
   const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
   const [classicsBooks, setClassicsBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showSmartSearch, setShowSmartSearch] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [smartCollection, setSmartCollection] = useState(null);
+  const [smartCollection, setSmartCollection] = useState<{ title: string; books: Book[] } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,6 +51,9 @@ const Index = () => {
   
   const handleShowSmartSearch = () => {
     setShowSmartSearch(true);
+    if (!smartCollection && !isGenerating) {
+      handleGenerateCollection();
+    }
   };
   
   const handleGenerateCollection = async () => {
@@ -55,8 +61,18 @@ const Index = () => {
     try {
       const collection = await createPersonalizedCollection("cele mai importante cărți clasice din toate timpurile");
       setSmartCollection(collection);
+      
+      toast({
+        title: "Colecție generată",
+        description: `Am creat colecția "${collection.title}" cu ${collection.books.length} cărți`,
+      });
     } catch (error) {
       console.error("Error generating collection:", error);
+      toast({
+        title: "Eroare",
+        description: "Nu am putut genera colecția. Încearcă din nou mai târziu.",
+        variant: "destructive",
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -86,11 +102,21 @@ const Index = () => {
                   disabled={isGenerating}
                   className="whitespace-nowrap"
                 >
-                  {isGenerating ? "Se generează..." : "Generează o colecție"}
+                  {isGenerating ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />Se generează...</>
+                  ) : (
+                    "Generează o colecție"
+                  )}
                 </Button>
               </div>
               
-              {smartCollection && (
+              {isGenerating && (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              
+              {smartCollection && !isGenerating && (
                 <SmartSearchResults collection={smartCollection} />
               )}
             </div>

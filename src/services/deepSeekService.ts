@@ -17,12 +17,13 @@ export interface DeepSeekResponse {
 // Generate similar books recommendations
 export const generateSimilarBooksRecommendation = async (
   book: Book,
-  numberOfRecommendations: number = 5
-): Promise<string[]> => {
+  numberOfRecommendations: number = 10
+): Promise<Book[]> => {
   try {
     const prompt = `
       I have just read "${book.title}" by ${book.authors.map(a => a.name).join(', ')}.
       Based on this book, please recommend ${numberOfRecommendations} similar books with their titles and authors.
+      Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
       The books should have similar themes, style, or subject matter.
       Format your response as a JSON array of objects with "title" and "author" properties.
       Only include the JSON in your response, nothing else.
@@ -59,7 +60,10 @@ export const generateSimilarBooksRecommendation = async (
       const jsonMatch = content.match(/\[\s*\{.*\}\s*\]/s);
       const jsonContent = jsonMatch ? jsonMatch[0] : content;
       const recommendations = JSON.parse(jsonContent);
-      return recommendations;
+      
+      // Fetch real books from Gutenberg for each recommended book
+      const realBooks = await fetchRealBooksFromRecommendations(recommendations);
+      return realBooks;
     } catch (parseError) {
       console.error("Failed to parse DeepSeek response:", parseError);
       return [];
@@ -145,7 +149,7 @@ export const createPersonalizedCollection = async (
   }
 };
 
-// Fetch real books from Gutenberg based on AI recommendations
+// Fetch real books from Gutenberg based on AI recommendations with improved matching
 const fetchRealBooksFromRecommendations = async (recommendations: Array<{title: string, author: string}>) => {
   const books: Array<Book> = [];
   const batchSize = 5;
@@ -170,37 +174,59 @@ const fetchRealBooksFromRecommendations = async (recommendations: Array<{title: 
   return books;
 };
 
-// Helper function to fetch a single book from Gutenberg
+// Helper function to fetch a single book from Gutenberg with improved search strategy
 const fetchBookFromGutenberg = async (title: string, author: string): Promise<Book | null> => {
   try {
-    // First try with both title and author
-    let searchQuery = `${title} ${author}`;
-    let response = await fetchBooks({
-      search: searchQuery,
-      limit: 1,
-    });
+    // Try different search strategies in order of precision
+    const searchStrategies = [
+      // Strategy 1: Title + Author
+      async () => {
+        const query = `${title} ${author}`;
+        const response = await fetchBooks({
+          search: query,
+          limit: 1,
+        });
+        return response.results?.length > 0 ? response.results[0] : null;
+      },
+      
+      // Strategy 2: Title only
+      async () => {
+        const response = await fetchBooks({
+          search: title,
+          limit: 1,
+        });
+        return response.results?.length > 0 ? response.results[0] : null;
+      },
+      
+      // Strategy 3: Author only
+      async () => {
+        const response = await fetchBooks({
+          search: author,
+          limit: 1,
+        });
+        return response.results?.length > 0 ? response.results[0] : null;
+      },
+      
+      // Strategy 4: Try with part of the title (first two words)
+      async () => {
+        const titleFirstTwoWords = title.split(' ').slice(0, 2).join(' ');
+        if (titleFirstTwoWords.length > 3) {
+          const response = await fetchBooks({
+            search: titleFirstTwoWords,
+            limit: 1,
+          });
+          return response.results?.length > 0 ? response.results[0] : null;
+        }
+        return null;
+      }
+    ];
     
-    // If no results, try with just the title
-    if (!response.results || response.results.length === 0) {
-      searchQuery = title;
-      response = await fetchBooks({
-        search: searchQuery,
-        limit: 1,
-      });
-    }
-    
-    // If still no results, try with just the author
-    if (!response.results || response.results.length === 0) {
-      searchQuery = author;
-      response = await fetchBooks({
-        search: searchQuery,
-        limit: 1,
-      });
-    }
-    
-    // Return the book if found
-    if (response.results && response.results.length > 0) {
-      return response.results[0];
+    // Try each strategy until a book is found
+    for (const strategy of searchStrategies) {
+      const book = await strategy();
+      if (book) {
+        return book;
+      }
     }
     
     return null;

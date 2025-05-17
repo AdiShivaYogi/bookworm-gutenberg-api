@@ -74,8 +74,8 @@ export const SmartSearchResults: React.FC<SmartSearchResultsProps> = ({ collecti
         
         <div className="mt-6 border-t pt-4 flex justify-end">
           <Button variant="link" asChild className="gap-1 text-primary">
-            <a href="/about">
-              Află mai multe despre colecțiile personalizate <ArrowRight className="h-4 w-4" />
+            <a href="/explore">
+              Vezi mai multe colecții <ArrowRight className="h-4 w-4" />
             </a>
           </Button>
         </div>

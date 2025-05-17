@@ -28,7 +28,8 @@ const Explore = () => {
     handleSearch,
     handleLanguageChange,
     handleSortOrderChange,
-    handlePopularListSelect
+    handlePopularListSelect,
+    toggleSmartSearch
   } = useExploreFilters();
 
   const { data, isLoading, isFetching } = useQuery({
@@ -48,6 +49,7 @@ const Explore = () => {
     
     setIsGenerating(true);
     setSmartSearchResults(null);
+    toggleSmartSearch();
     
     try {
       // Increase number of books to 20
@@ -125,7 +127,14 @@ const Explore = () => {
           </div>
         )}
 
-        {smartSearchResults && (
+        {isGenerating && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-3 text-lg">Se generează colecția personalizată...</span>
+          </div>
+        )}
+
+        {smartSearchResults && !isGenerating && (
           <SmartSearchResults collection={smartSearchResults} searchQuery={filters.searchQuery} />
         )}
         
