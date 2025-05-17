@@ -17,11 +17,23 @@ export const createPersonalizedCollection = async (
     const apiPrompt = `
       Create a personalized book collection based on this request: "${prompt}".
       Generate a title for this collection and recommend ${numberOfBooks} books that match the criteria.
-      IMPORTANT: Make sure the title accurately reflects the content and doesn't promise more books than what will be shown (around ${numberOfBooks} books).
-      Focus on classic books that would likely be in Project Gutenberg (public domain books published before 1927).
+      CRITICALLY IMPORTANT: Only include books that are in the public domain (published before 1927) and likely available in Project Gutenberg.
+      Focus on well-known classic books by famous authors.
+      Include a mix of titles and make sure to include author's full names.
+      Avoid modern books, obscure works, or anything published after 1927.
+      
       Format your response as a JSON object with "title" and "books" properties.
       The "books" property should be an array of objects with "title" and "author" properties.
       Only include the JSON in your response, nothing else.
+      
+      Example:
+      {
+        "title": "Great Classics of the 19th Century",
+        "books": [
+          {"title": "Pride and Prejudice", "author": "Jane Austen"},
+          {"title": "Moby-Dick", "author": "Herman Melville"}
+        ]
+      }
     `;
 
     const content = await callPerplexityApi(apiPrompt);

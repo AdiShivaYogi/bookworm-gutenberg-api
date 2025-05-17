@@ -5,7 +5,7 @@ import BookGrid from '@/components/BookGrid';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen, Loader2, Book as BookIcon, Sparkles, Star, Layers, Grid2x2 } from 'lucide-react';
 import SectionHeader from '@/components/book/SectionHeader';
-import { createPersonalizedCollection } from '@/services/deepSeekService';
+import { createPersonalizedCollection } from '@/services/book/collectionService';
 import { useToast } from '@/hooks/use-toast';
 
 interface DynamicCollectionProps {
@@ -30,7 +30,7 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
       try {
         const collection = await createPersonalizedCollection(prompt);
         setBooks(collection.books);
-        // Actualizează titlul colecției dacă AI-ul a generat unul mai bun
+        // Update collection title if AI generated a better one
         if (collection.title) {
           setCollectionTitle(collection.title);
         }
@@ -65,82 +65,82 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
   );
 };
 
-// Lista extinsă de prompturi pentru colecții diverse
+// Enhanced list of prompts more relevant to Gutenberg's public domain books
 const ALL_COLLECTION_PROMPTS = [
   {
+    title: "Capodopere literare universale",
+    prompt: "cele mai importante capodopere literare universale din domeniul public",
+    icon: <BookIcon className="h-5 w-5" />
+  },
+  {
     title: "Aventuri extraordinare",
-    prompt: "cărți clasice de aventură cu călătorii extraordinare și explorări",
+    prompt: "romane de aventură clasice din domeniul public precum Jules Verne, H.G. Wells",
     icon: <BookOpen className="h-5 w-5" />
   },
   {
-    title: "Mistere clasice",
-    prompt: "cele mai bune cărți clasice de mister și detective din toate timpurile",
+    title: "Literatură Victoriană",
+    prompt: "cele mai importante cărți din perioada victoriană, Charles Dickens, Jane Austen",
     icon: <BookIcon className="h-5 w-5" />
   },
   {
     title: "Iubire și romantism",
-    prompt: "cele mai frumoase romane de dragoste clasice",
+    prompt: "cele mai importante romane de dragoste clasice din domeniul public",
     icon: <Star className="h-5 w-5" />
   },
   {
-    title: "Filosofie și gândire",
-    prompt: "lucrări clasice de filosofie care au influențat istoria gândirii umane",
+    title: "Filosofie clasică",
+    prompt: "lucrări clasice de filosofie din domeniul public precum Platon, Aristotel, Kant",
     icon: <Sparkles className="h-5 w-5" />
   },
   {
-    title: "Aventuri fantastice",
-    prompt: "cele mai captivante cărți clasice de fantezie și lumi imaginare",
+    title: "Mitologie și legende",
+    prompt: "cărți clasice despre mitologie și legende din domeniul public",
     icon: <Layers className="h-5 w-5" />
   },
   {
-    title: "Mari biografii",
-    prompt: "cele mai importante biografii și autobiografii din literatura clasică",
+    title: "Shakespeare și dramaturgie",
+    prompt: "opere dramatice de William Shakespeare și alți dramaturgi clasici",
     icon: <BookOpen className="h-5 w-5" />
-  },
-  {
-    title: "Știință și descoperiri",
-    prompt: "cărți clasice despre știință, descoperiri și inovații",
-    icon: <Sparkles className="h-5 w-5" />
   },
   {
     title: "Poezie nemuritoare",
-    prompt: "cele mai importante colecții de poezii clasice din toate timpurile",
+    prompt: "cele mai importante colecții de poezii clasice din domeniul public",
     icon: <Star className="h-5 w-5" />
   },
   {
-    title: "Romane istorice",
-    prompt: "cele mai bune romane clasice cu tematică istorică",
+    title: "Romane clasice americane",
+    prompt: "cele mai importante romane americane clasice din domeniul public, Mark Twain, Herman Melville",
     icon: <BookIcon className="h-5 w-5" />
   },
   {
-    title: "Distopii și societăți imaginare",
-    prompt: "cărți clasice care prezintă viziuni distopice și societăți alternative",
+    title: "Mari biografii",
+    prompt: "biografii și autobiografii clasice din domeniul public",
+    icon: <BookOpen className="h-5 w-5" />
+  },
+  {
+    title: "Mistere detective",
+    prompt: "cele mai bune cărți clasice de mister și detective din domeniul public, Arthur Conan Doyle",
     icon: <Grid2x2 className="h-5 w-5" />
   },
   {
-    title: "Natura și mediul",
-    prompt: "cărți clasice despre natura, peisaje și relația omului cu mediul",
+    title: "Științe naturale",
+    prompt: "cărți clasice despre știință și natură din domeniul public precum Charles Darwin",
     icon: <Layers className="h-5 w-5" />
   },
   {
-    title: "Opere dramatice",
-    prompt: "cele mai importante piese de teatru din literatura clasică",
+    title: "Distopii clasice",
+    prompt: "romane distopice clasice din domeniul public",
     icon: <BookOpen className="h-5 w-5" />
   },
   {
-    title: "Putere și politică",
-    prompt: "cărți clasice despre putere, politică și conducere",
+    title: "Clasici rusești",
+    prompt: "cele mai importante opere din literatura rusă clasică din domeniul public, Dostoievski, Tolstoi",
     icon: <BookIcon className="h-5 w-5" />
   },
   {
-    title: "Călătorii în spațiu și timp",
-    prompt: "cărți clasice de călătorii în spațiu și timp",
+    title: "Explorări și călătorii",
+    prompt: "cărți clasice despre explorări și călătorii din domeniul public",
     icon: <Sparkles className="h-5 w-5" />
-  },
-  {
-    title: "Mari epopei",
-    prompt: "cele mai importante opere epice din literatura clasică",
-    icon: <BookOpen className="h-5 w-5" />
   }
 ];
 
