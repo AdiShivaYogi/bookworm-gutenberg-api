@@ -1,4 +1,3 @@
-
 import { Book } from "@/types/gutendex";
 import { callPerplexityApi } from "../api/perplexityApiService";
 import { hasValidApiKey } from "../api/perplexityApiConfig";
