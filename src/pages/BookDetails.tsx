@@ -12,6 +12,7 @@ import BookDetailsSkeleton from '@/components/book/BookDetailsSkeleton';
 import BookErrorDisplay from '@/components/book/BookErrorDisplay';
 import SimilarBooksSection from '@/components/book/SimilarBooksSection';
 import CreateCollectionSection from '@/components/book/CreateCollectionSection';
+import BookPreface from '@/components/book/BookPreface';
 
 const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,6 +43,9 @@ const BookDetails = () => {
           {/* Book Details */}
           <div className="md:w-2/3 lg:w-3/4">
             <BookInfo book={book} />
+            
+            {/* AI-generated Preface */}
+            <BookPreface book={book} />
             
             {/* AI-powered Recommendations */}
             <SimilarBooksSection book={book} />
