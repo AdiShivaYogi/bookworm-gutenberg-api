@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, Search, X, BookOpen, BookText, User, Heart, ChevronDown, BookOpenCheck, BookmarkPlus } from 'lucide-react';
+import { Menu, Search, X, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -66,26 +66,29 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchChange }) => {
   return (
     <header className={navbarClasses}>
       <div className="container flex items-center justify-between h-16 px-4 md:px-6">
-        <div className="flex items-center gap-4">
+        {/* Logo and tagline */}
+        <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105">
             <BookOpen className="h-6 w-6 text-libra-teal" />
-            <span className="font-bold text-xl bg-gradient-to-r from-libra-blue to-libra-teal bg-clip-text text-transparent">
-              Libra
-            </span>
+            <div className="flex flex-col items-start">
+              <span className="font-bold text-xl bg-gradient-to-r from-libra-blue to-libra-teal bg-clip-text text-transparent">
+                Libra
+              </span>
+              <span className="text-xs text-muted-foreground hidden sm:inline-block">Biblioteca digitală</span>
+            </div>
           </Link>
         </div>
 
-        {/* Desktop Navigation - Enhanced with NavigationMenu */}
-        <div className="hidden md:flex items-center gap-6">
+        {/* Desktop Navigation - Simplified */}
+        <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
           <NavigationMenu>
-            <NavigationMenuList>
+            <NavigationMenuList className="flex space-x-2">
               <NavigationMenuItem>
                 <Link 
                   to="/" 
                   className={cn(
-                    navigationMenuTriggerStyle(), 
-                    "bg-transparent hover:bg-accent/50 transition-colors",
-                    isActive('/') && "bg-accent/30 text-accent-foreground font-medium"
+                    "px-3 py-2 text-sm font-medium transition-colors rounded-md",
+                    isActive('/') ? "text-libra-teal" : "text-foreground/80 hover:text-foreground"
                   )}
                 >
                   Acasă
@@ -93,119 +96,24 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchChange }) => {
               </NavigationMenuItem>
               
               <NavigationMenuItem>
-                <NavigationMenuTrigger className={cn(
-                  "bg-transparent hover:bg-accent/50 transition-colors",
-                  (isActive('/explore') || location.pathname.includes('/book/')) && 
-                  "bg-accent/30 text-accent-foreground font-medium"
-                )}>
+                <Link 
+                  to="/explore"
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium transition-colors rounded-md",
+                    isActive('/explore') || location.pathname.includes('/book/') ? 
+                      "text-libra-teal" : "text-foreground/80 hover:text-foreground"
+                  )}
+                >
                   Explorează
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[450px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                    <li className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/explore"
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md 
-                          bg-gradient-to-br from-libra-blue/10 via-libra-teal/10 to-purple-400/10 p-6 no-underline 
-                          outline-none focus:shadow-md transition-all hover:from-libra-blue/20 hover:via-libra-teal/20 
-                          hover:to-purple-400/20 hover:scale-[1.02]"
-                        >
-                          <div className="mb-2 mt-4 flex items-center gap-2">
-                            <BookOpenCheck className="h-6 w-6 text-libra-teal" />
-                            <span className="text-lg font-medium">
-                              Toate cărțile
-                            </span>
-                          </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Descoperă întreaga bibliotecă de cărți din domeniului public.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/explore?search=classics"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline
-                          outline-none transition-colors hover:bg-accent hover:text-accent-foreground
-                          focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none flex items-center gap-1.5">
-                            <BookmarkPlus className="h-3.5 w-3.5" />
-                            Clasici Universali
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Opere literare clasice ce au marcat literatura universală.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/explore?search=poezie+poetry"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline
-                          outline-none transition-colors hover:bg-accent hover:text-accent-foreground
-                          focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none flex items-center gap-1.5">
-                            <BookmarkPlus className="h-3.5 w-3.5" />
-                            Poezie
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Versuri și creații poetice din întreaga lume.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/explore?search=aventura+adventure"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline
-                          outline-none transition-colors hover:bg-accent hover:text-accent-foreground
-                          focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none flex items-center gap-1.5">
-                            <BookmarkPlus className="h-3.5 w-3.5" />
-                            Aventură
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Povești captivante de explorare și aventură.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/explore?search=literatura+romaneasca"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline
-                          outline-none transition-colors hover:bg-accent hover:text-accent-foreground
-                          focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none flex items-center gap-1.5">
-                            <BookmarkPlus className="h-3.5 w-3.5" />
-                            Literatură românească
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Opere literare reprezentative pentru cultura românească.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                  </ul>
-                </NavigationMenuContent>
+                </Link>
               </NavigationMenuItem>
               
               <NavigationMenuItem>
                 <Link 
                   to="/about" 
                   className={cn(
-                    navigationMenuTriggerStyle(), 
-                    "bg-transparent hover:bg-accent/50 transition-colors",
-                    isActive('/about') && "bg-accent/30 text-accent-foreground font-medium"
+                    "px-3 py-2 text-sm font-medium transition-colors rounded-md",
+                    isActive('/about') ? "text-libra-teal" : "text-foreground/80 hover:text-foreground"
                   )}
                 >
                   Despre Libra
@@ -216,11 +124,12 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchChange }) => {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Search Form */}
           <form onSubmit={handleSearchSubmit} className="hidden md:flex items-center relative">
             <Input
               type="search"
-              placeholder="Caută cărți..."
-              className="w-[200px] lg:w-[300px] pr-10 transition-all focus-within:w-[350px] bg-background/70"
+              placeholder="Caută cărți, autori sau subiecte..."
+              className="w-[240px] lg:w-[300px] pr-10 transition-all focus-within:w-[350px] bg-background/70 rounded-full border-muted"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -250,7 +159,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchChange }) => {
         </div>
       </div>
 
-      {/* Mobile Menu - Improved styling with animation */}
+      {/* Mobile Menu - Simplified */}
       {isMobile && (
         <motion.div 
           className={cn(
@@ -268,12 +177,11 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchChange }) => {
               className={cn(
                 "flex items-center gap-2 text-base font-medium py-3 px-3 rounded-md transition-colors",
                 isActive('/') 
-                  ? "bg-accent/50 text-foreground" 
-                  : "hover:bg-accent/30"
+                  ? "text-libra-teal" 
+                  : "text-foreground/80 hover:text-foreground"
               )}
               onClick={() => setIsMenuOpen(false)}
             >
-              <BookOpen className="h-5 w-5" />
               Acasă
             </Link>
             <Link
@@ -281,12 +189,11 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchChange }) => {
               className={cn(
                 "flex items-center gap-2 text-base font-medium py-3 px-3 rounded-md transition-colors",
                 isActive('/explore') 
-                  ? "bg-accent/50 text-foreground" 
-                  : "hover:bg-accent/30"
+                  ? "text-libra-teal" 
+                  : "text-foreground/80 hover:text-foreground"
               )}
               onClick={() => setIsMenuOpen(false)}
             >
-              <BookText className="h-5 w-5" />
               Explorează
             </Link>
             <Link
@@ -294,55 +201,20 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchChange }) => {
               className={cn(
                 "flex items-center gap-2 text-base font-medium py-3 px-3 rounded-md transition-colors",
                 isActive('/about') 
-                  ? "bg-accent/50 text-foreground" 
-                  : "hover:bg-accent/30"
+                  ? "text-libra-teal" 
+                  : "text-foreground/80 hover:text-foreground"
               )}
               onClick={() => setIsMenuOpen(false)}
             >
-              <User className="h-5 w-5" />
               Despre Libra
             </Link>
-            
-            <div className="mt-2 pt-4 border-t">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3 px-3">Categorii populare</h3>
-              <div className="space-y-1">
-                <Link
-                  to="/explore?search=classics"
-                  className="flex items-center gap-2 text-sm py-2.5 px-3 rounded-md hover:bg-accent/30 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Clasici Universali
-                </Link>
-                <Link
-                  to="/explore?search=poezie+poetry"
-                  className="flex items-center gap-2 text-sm py-2.5 px-3 rounded-md hover:bg-accent/30 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Poezie
-                </Link>
-                <Link
-                  to="/explore?search=aventura+adventure"
-                  className="flex items-center gap-2 text-sm py-2.5 px-3 rounded-md hover:bg-accent/30 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Aventură
-                </Link>
-                <Link
-                  to="/explore?search=literatura+romaneasca"
-                  className="flex items-center gap-2 text-sm py-2.5 px-3 rounded-md hover:bg-accent/30 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Literatură românească
-                </Link>
-              </div>
-            </div>
             
             <form onSubmit={handleSearchSubmit} className="mt-4 pt-4 border-t">
               <div className="flex items-center relative">
                 <Input
                   type="search"
-                  placeholder="Caută cărți..."
-                  className="w-full pr-10"
+                  placeholder="Caută cărți, autori sau subiecte..."
+                  className="w-full pr-10 rounded-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
