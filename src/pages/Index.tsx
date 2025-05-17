@@ -10,6 +10,8 @@ import { createPersonalizedCollection } from '@/services/deepSeekService';
 import { SmartSearchResults } from '@/components/explore/SmartSearchResults';
 import { useToast } from '@/hooks/use-toast';
 import { DynamicCollections } from '@/components/explore/DynamicCollections';
+import PopularCategories from '@/components/PopularCategories';
+import LibraStats from '@/components/LibraStats';
 
 const Index = () => {
   const { toast } = useToast();
@@ -56,6 +58,9 @@ const Index = () => {
       <Navbar onSearchChange={handleSearch} />
       <main className="flex-grow">
         <Hero />
+        
+        {/* Adăugăm secțiunea de categorii populare */}
+        <PopularCategories />
 
         {showSmartSearch && (
           <section className="container px-4 py-8">
@@ -122,6 +127,9 @@ const Index = () => {
 
         {/* Înlocuim colecțiile statice cu colecții dinamice generate de AI */}
         <DynamicCollections />
+        
+        {/* Adăugăm secțiunea de statistici */}
+        <LibraStats />
 
         <section className="container px-4 py-8 md:py-12">
           <div className="rounded-xl bg-gradient-to-br from-accent/10 to-primary/10 p-8 md:p-10 mb-16">

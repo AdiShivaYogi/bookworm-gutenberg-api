@@ -13,12 +13,14 @@ interface DynamicCollectionProps {
   title: string;
   prompt: string;
   icon: LucideIcon;
+  priority?: boolean;
 }
 
 export const DynamicCollection: React.FC<DynamicCollectionProps> = ({ 
   title, 
   prompt,
-  icon
+  icon,
+  priority = false
 }) => {
   const { toast } = useToast();
   const [books, setBooks] = useState<Book[]>([]);
@@ -58,8 +60,14 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
       }
     };
 
-    fetchCollection();
-  }, [prompt, toast]);
+    // Use a small delay for non-priority collections to avoid overwhelming the API
+    const delay = priority ? 0 : Math.random() * 1000;
+    const timer = setTimeout(() => {
+      fetchCollection();
+    }, delay);
+    
+    return () => clearTimeout(timer);
+  }, [prompt, toast, priority]);
 
   // If there was an error and no books were loaded, don't render this collection
   if (error && !isLoading && books.length === 0) {
@@ -70,7 +78,7 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
   const IconComponent = icon;
   
   return (
-    <section className="container px-4 py-8 md:py-12">
+    <section className={`container px-4 py-8 md:py-12 ${!priority ? 'bg-gray-50' : ''}`}>
       <div className="flex items-center justify-between mb-6">
         <SectionHeader 
           title={collectionTitle} 
