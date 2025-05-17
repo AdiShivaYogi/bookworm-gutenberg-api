@@ -7,20 +7,22 @@ interface EmptyStateCardProps {
   buttonText: string;
   onClick: () => void;
   buttonIcon?: ReactNode;
+  disabled?: boolean;
 }
 
 const EmptyStateCard: React.FC<EmptyStateCardProps> = ({ 
   message, 
   buttonText, 
   onClick,
-  buttonIcon 
+  buttonIcon,
+  disabled = false
 }) => {
   return (
     <div className="text-center py-6">
       <p className="text-muted-foreground mb-4">
         {message}
       </p>
-      <Button onClick={onClick}>
+      <Button onClick={onClick} disabled={disabled}>
         {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
         {buttonText}
       </Button>
