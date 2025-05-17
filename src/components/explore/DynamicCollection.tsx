@@ -26,21 +26,7 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRetrying, setIsRetrying] = useState<boolean>(false);
-  const [collectionTitle, setCollectionTitle] = useState<string>(title);
   const [error, setError] = useState<boolean>(false);
-
-  // Funcție pentru a simplifica titlul unei colecții
-  const simplifyCollectionTitle = (title: string): string => {
-    // Verifică dacă titlul conține un format cu autori și detalii Gutenberg
-    if (title.includes(' de ') && title.includes(' din Gutenberg')) {
-      // Caută partea de început a titlului (până la "de" sau până la "disponibile")
-      const match = title.match(/^(.*?)(?= de | disponibile)/);
-      if (match && match[1]) {
-        return match[1].trim();
-      }
-    }
-    return title;
-  };
 
   const fetchCollection = async () => {
     setIsLoading(true);
@@ -56,15 +42,7 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
         setError(true);
       } else {
         setBooks(collection.books);
-        // Actualizează titlul colecției și aplică simplificarea
-        if (collection.title && collection.title.length > 0) {
-          const simplifiedTitle = simplifyCollectionTitle(collection.title);
-          setCollectionTitle(simplifiedTitle);
-        } else {
-          // Dacă nu avem un titlu generat, folosim titlul original simplificat
-          setCollectionTitle(simplifyCollectionTitle(title));
-        }
-        console.log(`Successfully loaded collection "${collection.title}" with ${collection.books.length} books`);
+        console.log(`Successfully loaded collection with ${collection.books.length} books`);
       }
     } catch (error) {
       console.error("Error fetching dynamic collection:", error);
@@ -101,7 +79,7 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
     <section className={`container px-4 py-8 md:py-12 ${!priority ? 'bg-gray-50' : ''}`}>
       <div className="flex items-center justify-between mb-6">
         <SectionHeader 
-          title={collectionTitle} 
+          title={title} 
           icon={<IconComponent className="h-5 w-5" />} 
         />
         <div className="flex items-center gap-2">
@@ -131,3 +109,4 @@ export const DynamicCollection: React.FC<DynamicCollectionProps> = ({
     </section>
   );
 };
+
