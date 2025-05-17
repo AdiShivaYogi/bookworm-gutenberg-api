@@ -27,4 +27,3 @@ export {
   searchByPartialTitle,
   searchByAuthorLastName
 } from './searchStrategies';
-
